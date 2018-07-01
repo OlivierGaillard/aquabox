@@ -29,13 +29,13 @@ except:
     sys.exit()
 
 # Do the work
-for i in range(60):
+for i in range(120):
    print('*', end='')
    sys.stdout.flush()
    time.sleep(1)
 print()
 
-# Set RTC alarm 5 minutes from now
+# Set RTC alarm 15 minutes from now
 # RTC is kept in UTC
 a={}
 a['year'] = 'EVERY_YEAR'
