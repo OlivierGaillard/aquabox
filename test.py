@@ -7,6 +7,10 @@ import datetime
 import os
 import sys
 
+
+# This script could be called after the sensors' job to set the time of the next
+# power-on and reboot.
+
 DELTA_MIN=15
 
 # Rely on RTC to keep the time
@@ -43,7 +47,8 @@ a['month'] = 'EVERY_MONTH'
 a['day'] = 'EVERY_DAY'
 a['hour'] = 'EVERY_HOUR'
 t = datetime.datetime.utcnow()
-a['minute'] = (t.minute + DELTA_MIN) % 60
+#a['minute'] = (t.minute + DELTA_MIN) % 60
+a['minute'] = 0
 a['second'] = 0
 status = pj.rtcAlarm.SetAlarm(a)
 if status['error'] != 'NO_ERROR':
