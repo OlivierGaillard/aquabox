@@ -99,9 +99,9 @@ def main():
     logging.info('pH: %s', p.ph)
     p.send_ph()
     logging.debug('pH sent to service')
-    if not boxsettings.FAKE_DATA:
-        logging.info("Setting sensor in sleeping mode.")
-        sleep.startSleep()
+    # if not boxsettings.FAKE_DATA:
+    #     logging.info("Setting sensor in sleeping mode.")
+    #     sleep.startSleep()
     print 'pH:', p.ph
     logging.info("End of pH measure")
 

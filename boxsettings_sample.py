@@ -21,3 +21,6 @@ REST_PASSWORD =  'your password'
 FAKE_DATA = True
 
 USB_PORT = '/dev/ttyAMA0'
+
+SHUT_DOWN = False
+
