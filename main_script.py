@@ -8,9 +8,15 @@ import subprocess
 import datetime
 import os
 import sys
+import logging
 from restclient import Sender
 
+logname = '/home/pi/phweb/box/rest.log'
+logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
+                    filemode='a', level=logging.DEBUG)
 
+# Rely on RTC to keep the time
+subprocess.call(["sudo", "hwclock", "--hctosys"])
 
 get_and_send_ph.main()
 time.sleep(10)
@@ -25,6 +31,7 @@ while not os.path.exists('/dev/i2c-1'):
 try:
     pj = pijuice.PiJuice(1, 0x14)
 except:
+    logging.fatal("Cannot create pijuice object")
     print("Cannot create pijuice object")
     sys.exit()
 
@@ -41,8 +48,10 @@ a['second'] = 0
 status = pj.rtcAlarm.SetAlarm(a)
 if status['error'] != 'NO_ERROR':
     print('Cannot set alarm\n')
+    logging.warning('Cannot set alarm')
     sys.exit()
 else:
+    logging.info('Alarm set for %s' % str(pj.rtcAlarm.GetAlarm()))
     print('Alarm set for ' + str(pj.rtcAlarm.GetAlarm()))
 
 # Enable wakeup, otherwise power to the RPi will not be
@@ -55,9 +64,11 @@ time.sleep(0.4)
 sender = Sender()
 enable_shutdown = sender.get_shutdown_settings()
 if enable_shutdown:
+    logging.info('We will MAKE a shutdown')
     print('We will MAKE a shutdown')
     pj.power.SetPowerOff(20)
     subprocess.call(["sudo", "poweroff"])
 else:
     print('We do NOT make a shutdown')
+    logging.info('We do NOT make a shutdown')
 
