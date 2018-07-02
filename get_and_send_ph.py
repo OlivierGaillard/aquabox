@@ -82,7 +82,7 @@ class GetSendPh:
 
 
     def send_ph(self):
-        logging.debug('GetSendPh: send_temperature')
+        logging.debug('GetSendPh')
         sender = Sender()
         sender.send_ph(self.ph)
 
@@ -93,8 +93,10 @@ def main():
     logging.info('Start pH measure')
     p = GetSendPh()
     if not boxsettings.FAKE_DATA:
+        logging.info('True data. calling measure_ph')
         p.measure_ph(1, 5)
     else:
+        logging.warning('FAKE-DATA')
         p.set_random_ph()
     logging.info('pH: %s', p.ph)
     p.send_ph()
