@@ -36,7 +36,7 @@ class TestApi(unittest.TestCase):
         return value
 
 
-    def test_degree_list_for_raspi(self):
+    def btest_degree_list_for_raspi(self):
         url = self.live_server_url + '/deg/'
         r = requests.get(url, auth=(self.user_box, self.user_box_passwd))
         self.assertEqual(r.status_code, 200)
@@ -44,7 +44,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(type(results), list)
 
 
-    def test_sender_deg(self):
+    def btest_sender_deg(self):
         sender = Sender()
         for i in range(0,8):
             if i % 2:
@@ -57,7 +57,7 @@ class TestApi(unittest.TestCase):
             self.assertEqual(201, response.status_code)
 
 
-    def test_delete_deg(self):
+    def btest_delete_deg(self):
         sender = Sender()
         response = sender.send_deg(self.get_random_degree())
         self.assertEqual(201, response.status_code)
@@ -66,12 +66,12 @@ class TestApi(unittest.TestCase):
         status_code = sender.del_deg(id)
         self.assertEqual(200, status_code)
 
-    def test_sender_ph(self):
+    def btest_sender_ph(self):
         sender = Sender()
         response = sender.send_ph(self.get_random_ph())
         self.assertEqual(201, response.status_code)
 
-    def test_sender_redox(self):
+    def btest_sender_redox(self):
         sender = Sender()
         value = self.get_random_redox()
         response = sender.send_redox(value)
@@ -81,7 +81,19 @@ class TestApi(unittest.TestCase):
         """Get last value saved"""
         sender = Sender()
         response = sender.deg_last()
+        print(response.json())
         self.assertEqual(response.status_code, 200)
+
+
+    def test_get_shutdown_instruction(self):
+        sender = Sender()
+        enable_shutdown = sender.get_shutdown_settings()
+        if enable_shutdown:
+            print('Shutdown enabled.')
+        else:
+            print('Shutdown disabled')
+        self.assertIsNotNone(enable_shutdown, "REST returned None in place of true / false")
+
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ import subprocess
 import datetime
 import os
 import sys
+from restclient import Sender
 
 
 # This script could be called after the sensors' job to set the time of the next
@@ -64,5 +65,11 @@ time.sleep(0.4)
 
 # PiJuice shuts down power to Rpi after 20 sec from now
 # This leaves sufficient time to execute the shutdown sequence
-pj.power.SetPowerOff(20)
-subprocess.call(["sudo", "poweroff"])
+sender = Sender()
+enable_shutdown = sender.get_shutdown_settings()
+if enable_shutdown:
+    print('We will MAKE a shutdown')
+    pj.power.SetPowerOff(20)
+    subprocess.call(["sudo", "poweroff"])
+else:
+    print('We do NOT make a shutdown')

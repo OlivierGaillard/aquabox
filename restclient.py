@@ -32,6 +32,7 @@ class Sender:
             logging.fatal("Cannot reach REST service: %s", url)
         else:
             logging.info("Data sent to %s of REST service.", urlsuffix)
+            logging.info("Error: %s" % r.status_code)
         return r
 
     def send_deg(self, value):
@@ -77,6 +78,7 @@ class Sender:
         r = requests.get(url, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 200:
             logging.fatal("Cannot reach REST service.")
+            logging.info("Error: %s" % r.status_code)
             return r
         else:
             value = r.json()[measures[data_type]]
@@ -87,6 +89,26 @@ class Sender:
     def deg_last(self):
         return self.__get_last('deg')
 
+    def get_piscine_settings(self):
+        url = self.live_server_url + '/piscine/'
+        r = requests.get(url, auth=(self.user_box, self.user_box_passwd))
+        if r.status_code != 200:
+            logging.fatal("Cannot reach REST service.")
+            logging.info("Error: %s" % r.status_code)
+            raise Exception("Connection to REST service failed.")
+        else:
+            values = r.json()[0]
+            return values
+
+    def get_shutdown_settings(self):
+        enable_shutdown = None
+        try:
+            values = self.get_piscine_settings() # Json object
+            enable_shutdown = values['enable_shutdown']
+            logging.info("Making a shutdown or not? Answer: %s" % enable_shutdown)
+        except:
+            pass
+        return enable_shutdown
 
 
 if __name__ == '__main__':
