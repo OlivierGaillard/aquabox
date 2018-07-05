@@ -44,7 +44,7 @@ def main():
 
     # Enable wakeup, otherwise power to the RPi will not be
     # applied when the RTC alarm goes off
-    pj.rtcAlarm.SetWakeupEnabled(True)
+    pj.rtcAlarm.SetWakeupEnabled(False) # True
     time.sleep(0.4)
 
     # PiJuice shuts down power to Rpi after 20 sec from now

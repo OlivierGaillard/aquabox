@@ -58,7 +58,7 @@ class GetSendPh:
 
 
     def measure_ph(self, trial_count, max_trial=5):
-        logging.debug('getPh: trial_count: %s, max_trial: %s', trial_count, max_trial)
+        logging.debug('In measure_ph: trial_count: %s, max_trial: %s', trial_count, max_trial)
         trial_count += 1
         if (trial_count > max_trial):
             logging.warning("Maximum trials %s was reached. Unable to get pH", max_trial)
@@ -99,8 +99,8 @@ def main():
         logging.warning('FAKE-DATA')
         p.set_random_ph()
     logging.info('pH: %s', p.ph)
-    p.send_ph()
-    logging.debug('pH sent to service')
+    #p.send_ph()
+    #logging.debug('pH sent to service')
     # if not boxsettings.FAKE_DATA:
     #     logging.info("Setting sensor in sleeping mode.")
     #     sleep.startSleep()

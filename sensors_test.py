@@ -21,9 +21,10 @@ class TestSensors(unittest.TestCase):
         self.user_box_passwd = boxsettings.REST_PASSWORD
 
 
-    def get_ph(self):
+    def test_get_ph(self):
         ph = GetSendPh()
         ph.measure_ph(trial_count=1, max_trial=5)
+        print(ph.ph)
         self.assertTrue(ph.ph > 0.0)
 
 
