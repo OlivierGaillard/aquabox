@@ -13,10 +13,14 @@ class ProbesController:
         return 'L,1'
 
     def translate_answer(self, answer):
-        translations = {'Error 254' : 'Error', '?L,0' : 'Off', '?L,1' : 'On' }
+        CMD_SUCCESS = 'Command succeeded'
+        translations = {'Error 254' : 'Error', '?L,0' : 'Off', '?L,1' : 'On', 'Command succeeded' : 'Command succeeded' }
+        answer = answer.strip()
+        if answer == CMD_SUCCESS:
+            return answer
         try:
-            if answer.startswith('Command succeeded'):
-                tmp = answer.split('Command succeeded')[1].strip()
+            if answer.startswith(CMD_SUCCESS):
+                tmp = answer.split(CMD_SUCCESS)[1].strip()
                 return translations[tmp]
             return translations[answer]
         except KeyError:
@@ -156,6 +160,7 @@ class Ph(Probes):
         if ord(response[0]) == 1:  # if the response isn't an error
             # change MSB to 0 for all received characters except the first and get a list of characters
             char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
+            print "Super raw response: '%s'" % ''.join(char_list)
             # NOTE: having to change the MSB to 0 is a glitch in the raspberry pi, and you shouldn't have to do this!
             return "Command succeeded " + ''.join(char_list)  # convert the char list to a string and returns it
         else:

@@ -25,14 +25,14 @@ class TestSensors(unittest.TestCase):
     def test_mock_ph_get_Led_state(self):
         mockph = Probes.factory('mock_ph')
         state = mockph.query_led_state()
-        print 'State: ' + state
         self.assertTrue(state == 'On' or state == 'Off' or state == 'Error')
 
     def test_get_real_pH_Led_state(self):
         ph = Probes.factory('ph') # real pH probe
-        state = ph.query_led_state()
-        print "state: '%s'" % state
-        self.assertTrue(state == 'On' or state == 'Off' or state == 'Error')
+        for i in range(0,10):
+            state = ph.query_led_state()
+            print "pH Led state: '%s'" % state
+        self.assertTrue(state == 'On' or state == 'Off' or state == 'Error' or state == 'Command succeeded')
 
     def test_translate_answer(self):
         probectrl = ProbesController()
