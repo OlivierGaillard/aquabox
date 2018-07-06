@@ -38,10 +38,11 @@ class TestSensors(unittest.TestCase):
         measure = mock_probe.measure()
         self.assertTrue(float(measure) > 0.0 and float(measure) < 15.0)
 
-    def test_get_Led_state(self):
+    def test_get_real_pH_Led_state(self):
         ph = Probes.factory('ph') # real pH probe
         state = ph.query_led_state()
-        self.assertTrue(state.startswith('L'))
+        print "state: " + state
+        self.assertTrue(state == 'Command succeeded ?L,0' or state == 'Error 254')
 
 
     # def btest_get_ph(self):
