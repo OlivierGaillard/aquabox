@@ -30,7 +30,7 @@ class TestSensors(unittest.TestCase):
 
     def test_get_real_pH_Led_state(self):
         ph = Probes.factory('ph') # real pH probe
-        for i in range(0,10):
+        for i in range(0,3):
             state = ph.query_led_state()
             print "pH Led state: '%s'" % state
         self.assertTrue(state == 'On' or state == 'Off' or state == 'Error' or state == 'Command succeeded')
@@ -40,9 +40,20 @@ class TestSensors(unittest.TestCase):
         answer = probectrl.translate_answer('Command succeeded ?L,0')
         self.assertEqual(answer, 'Off')
 
-    def test_set_Led_On_read_pH(self):
+    def test_set_Led_On_real_pH(self):
         ph = Probes.factory('ph')
         ph.set_led_on()
+        for i in range(0,5):
+            state = ph.query_led_state()
+            if state == 'On':
+                print state
+                break
+            else:
+                print 'retrying...'
+                ph.set_led_on()
+
+    def def_led_off_On_real_pH(self):
+        pass
 
 
     # def btest_get_ph(self):
