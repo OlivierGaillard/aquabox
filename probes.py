@@ -14,6 +14,9 @@ class ProbesController:
     def translate_answer(self, answer):
         translations = {'Error 254' : 'Error', '?L,0' : 'Off', '?L,1' : 'On' }
         try:
+            if answer.startswith('Command succeed'):
+                tmp = answer.split('Command succeed')[1]
+                return translations[tmp]
             return translations[answer]
         except KeyError:
             raise Exception('Unable to translate answer: %s' % answer)
