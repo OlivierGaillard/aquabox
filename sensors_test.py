@@ -3,7 +3,7 @@ import unittest
 import random
 from restclient import Sender
 import boxsettings
-from probes import Probes
+from probes import Probes, ProbesController
 #from get_and_send_ph import GetSendPh
 
 
@@ -28,12 +28,16 @@ class TestSensors(unittest.TestCase):
         print 'State: ' + state
         self.assertTrue(state == 'On' or state == 'Off' or state == 'Error')
 
-    def test_get_real_pH_Led_state(self):
+    def btest_get_real_pH_Led_state(self):
         ph = Probes.factory('ph') # real pH probe
         state = ph.query_led_state()
         print "state: " + state
         self.assertTrue(state == 'On' or state == 'Off' or state == 'Error')
 
+    def test_translate_answer(self):
+        probectrl = ProbesController()
+        answer = probectrl.translate_answer('Command succeeded ?L,0')
+        self.assertEqual(answer, 'Off')
 
     # def btest_get_ph(self):
     #     ph = GetSendPh()
