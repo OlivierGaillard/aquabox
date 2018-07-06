@@ -11,6 +11,13 @@ class ProbesController:
     def get_Led_On_Cmd(self):
         return 'L,1'
 
+    def translate_answer(self, answer):
+        translations = {'Error 254' : 'Error', '?L,0' : 'Off', '?L,1' : 'On' }
+        try:
+            return translations[answer]
+        except KeyError:
+            raise Exception('Unable to translate answer: %s' % answer)
+
 class Probes:
     __metaclass__ = ABCMeta
 
@@ -20,7 +27,7 @@ class Probes:
     def query_led_state(self):
         self.write_command(self.controller.led_State())
         response = self.read_value()
-        return response
+        return self.controller.translate_answer(response)
 
     def set_led_on(self):
         self.write_command(self.controller.get_Led_On_Cmd())
@@ -86,7 +93,7 @@ class MockPh(Probes):
 
     def read_value(self):
         if self.command == 'L,?':
-            return 'L,0'
+            return '?L,0'
 
     def write_command(self, cmd):
         self.command = cmd

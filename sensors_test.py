@@ -25,24 +25,14 @@ class TestSensors(unittest.TestCase):
     def test_mock_ph_get_Led_state(self):
         mockph = Probes.factory('mock_ph')
         state = mockph.query_led_state()
-        self.assertTrue(state.startswith('L'))
-
-    def btest_read_from_mock_ph_probe(self):
-        mock_probe = Probes.factory('mock_ph')
-        measure = mock_probe.measure()
-        self.assertTrue(float(measure) > 0.0 and float(measure) < 15.0)
-
-    def btest_read_from_mock_ph_probe_not_ready(self):
-        mock_probe = Probes.factory('mock_ph')
-        mock_probe.set_not_ready()
-        measure = mock_probe.measure()
-        self.assertTrue(float(measure) > 0.0 and float(measure) < 15.0)
+        print 'State: ' + state
+        self.assertTrue(state == 'On' or state == 'Off' or state == 'Error')
 
     def test_get_real_pH_Led_state(self):
         ph = Probes.factory('ph') # real pH probe
         state = ph.query_led_state()
         print "state: " + state
-        self.assertTrue(state == 'Command succeeded ?L,0' or state == 'Error 254')
+        self.assertTrue(state == 'On' or state == 'Off' or state == 'Error')
 
 
     # def btest_get_ph(self):
