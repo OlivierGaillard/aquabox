@@ -2,6 +2,7 @@ import random
 from abc import ABCMeta, abstractmethod, abstractproperty
 import io
 import fcntl
+import time
 
 class ProbesController:
 
@@ -23,12 +24,15 @@ class ProbesController:
 
 class Probes:
     __metaclass__ = ABCMeta
+    long_timeout = 1.5  # the timeout needed to query readings and calibrations
+    short_timeout = .5  # timeout for regular commands
 
     def __init__(self):
         self.controller = ProbesController()
 
     def query_led_state(self):
         self.write_command(self.controller.led_State())
+        time.sleep(self.long_timeout)
         response = self.read_value()
         return self.controller.translate_answer(response)
 
@@ -107,7 +111,8 @@ class Ph(Probes):
     """
     pH_EZO based on Atlas Scientific i2c.py code
     """
-
+    long_timeout = 1.5  # the timeout needed to query readings and calibrations
+    short_timeout = .5  # timeout for regular commands
     default_address = 99
     current_address = default_address
     default_bus = 1
