@@ -5,6 +5,7 @@ from restclient import Sender
 import boxsettings
 import sleep
 import random
+from i2c import AtlasI2C
 
 logname = '/home/pi/phweb/box/rest.log'
 logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
@@ -13,6 +14,9 @@ logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filenam
 
 
 class GetSendPh:
+    """
+    This class use one factory to use the pH sensor (real or mock).
+    """
 
     def __init__(self):
         self.ph = 0
