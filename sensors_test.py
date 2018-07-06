@@ -5,6 +5,7 @@ from restclient import Sender
 import boxsettings
 from probes import Probes, ProbesController
 #from get_and_send_ph import GetSendPh
+import time
 
 
 
@@ -38,6 +39,11 @@ class TestSensors(unittest.TestCase):
         probectrl = ProbesController()
         answer = probectrl.translate_answer('Command succeeded ?L,0')
         self.assertEqual(answer, 'Off')
+
+    def test_set_Led_On_read_pH(self):
+        ph = Probes.factory('ph')
+        ph.set_led_on()
+
 
     # def btest_get_ph(self):
     #     ph = GetSendPh()

@@ -12,6 +12,9 @@ class ProbesController:
     def get_Led_On_Cmd(self):
         return 'L,1'
 
+    def get_Led_Off_Cmd(self):
+        return 'L,0'
+
     def translate_answer(self, answer):
         CMD_SUCCESS = 'Command succeeded'
         translations = {'Error 254' : 'Error', '?L,0' : 'Off', '?L,1' : 'On', 'Command succeeded' : 'Command succeeded' }
@@ -42,6 +45,9 @@ class Probes:
 
     def set_led_on(self):
         self.write_command(self.controller.get_Led_On_Cmd())
+
+    def set_led_off(self):
+        self.write_command(self.controller.get_led_Off_Comd())
 
     @abstractmethod
     def read_value(self):
