@@ -28,10 +28,10 @@ class TestSensors(unittest.TestCase):
         print 'State: ' + state
         self.assertTrue(state == 'On' or state == 'Off' or state == 'Error')
 
-    def btest_get_real_pH_Led_state(self):
+    def test_get_real_pH_Led_state(self):
         ph = Probes.factory('ph') # real pH probe
         state = ph.query_led_state()
-        print "state: " + state
+        print "state: '%s'" % state
         self.assertTrue(state == 'On' or state == 'Off' or state == 'Error')
 
     def test_translate_answer(self):

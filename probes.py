@@ -20,7 +20,7 @@ class ProbesController:
                 return translations[tmp]
             return translations[answer]
         except KeyError:
-            raise Exception('Unable to translate answer: %s' % answer)
+            raise Exception('Unable to translate answer: "%s"' % answer)
 
 class Probes:
     __metaclass__ = ABCMeta
