@@ -143,19 +143,11 @@ class Ph(Probes):
         fcntl.ioctl(self.file_write, I2C_SLAVE, addr)
         self.current_addr = addr
 
-    # def write(self, cmd):
-    #     # appends the null character and sends the string over I2C
-    #     cmd += "\00"
-    #     self.file_write.write(cmd)
-
-    def set_not_ready(self):
-        self.ready = False
-
-
 
     def read_value(self, num_of_bytes=31):
         # reads a specified number of bytes from I2C, then parses and displays the result
-        res = self.file_read.read(num_of_bytes)  # read from the board
+        #res = self.file_read.read(num_of_bytes)  # read from the board
+        res = self.file_read.read()
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
         if ord(response[0]) == 1:  # if the response isn't an error
             # change MSB to 0 for all received characters except the first and get a list of characters
