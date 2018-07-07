@@ -154,11 +154,8 @@ class Ph(Probes):
         # reads a specified number of bytes from I2C, then parses and displays the result
         res = self.file_read.read(num_of_bytes)  # read from the board
 
-        if (res == "\r" or data == ""):
-            print "value read: " + res 
-
-
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
+        print "response[0]: " + ord(response[0])
         if ord(response[0]) == 1:  # if the response isn't an error
             # change MSB to 0 for all received characters except the first and get a list of characters
             #char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
