@@ -6,6 +6,9 @@ import time
 
 class ProbesController:
 
+
+
+
     def led_State(self):
         return 'L,?'
 
@@ -31,8 +34,19 @@ class ProbesController:
 
 class Probes:
     __metaclass__ = ABCMeta
+
+    # these values are identical for all 3 probes
+    NO_DATA_SEND = 255
+    STILL_PROCESSING_NOT_READY = 254
+    SYNTAX_ERROR = 2
+    SUCCESSFUL_REQUEST = 1
     long_timeout = 1.5  # the timeout needed to query readings and calibrations
     short_timeout = .5  # timeout for regular commands
+
+    answers = {NO_DATA_SEND : 'NO DATA SEND',
+               STILL_PROCESSING_NOT_READY : 'STILL PROCESSING NOT READY',
+               SYNTAX_ERROR : 'SYNTAX ERROR',
+               SUCCESSFUL_REQUEST : 'SUCCESSFUL REQUEST'}
 
     def __init__(self):
         self.controller = ProbesController()
@@ -156,7 +170,7 @@ class Ph(Probes):
 
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
         print "response[0]: " + str(ord(response[0]))
-        if ord(response[0]) == 1:  # if the response isn't an error
+        if ord(response[0]) == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
             # change MSB to 0 for all received characters except the first and get a list of characters
             #char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
             char_list = map(lambda x: chr(ord(x)), list(response[1:]))
@@ -164,7 +178,7 @@ class Ph(Probes):
             # NOTE: having to change the MSB to 0 is a glitch in the raspberry pi, and you shouldn't have to do this!
             return "Command succeeded " + ''.join(char_list)  # convert the char list to a string and returns it
         else:
-            return "Error " + str(ord(response[0]))
+            return "Error " + str(ord(response[0])) + self.answers[ord(response[0])]
 
 
 
