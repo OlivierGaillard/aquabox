@@ -174,13 +174,20 @@ class Ph(Probes):
             # change MSB to 0 for all received characters except the first and get a list of characters
             #char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
             print self.answers[self.SUCCESSFUL_REQUEST]
-            print "answer is: "
             char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
+            if len(answer) == 0:
+                print "answer empty"
+                print "retrying. wait 3 seconds"
+                time.sleep(3.0)
+                self.read_value(num_of_bytes=31)
+            else:
+                print "answer not empty"
             return answer
             # NOTE: having to change the MSB to 0 is a glitch in the raspberry pi, and you shouldn't have to do this!
         else:
-            return "Error " + str(ord(response[0])) + self.answers[ord(response[0])]
+            print "error arises"
+            return self.answers[ord(response[0])]
 
 
 
