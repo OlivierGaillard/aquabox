@@ -176,7 +176,8 @@ class Ph(Probes):
             print self.answers[self.SUCCESSFUL_REQUEST]
             print "answer is: "
             char_list = map(lambda x: chr(ord(x)), list(response[1:]))
-            print ''.join(char_list)
+            answer =  ''.join(char_list)
+            return answer
             # NOTE: having to change the MSB to 0 is a glitch in the raspberry pi, and you shouldn't have to do this!
         else:
             return "Error " + str(ord(response[0])) + self.answers[ord(response[0])]
