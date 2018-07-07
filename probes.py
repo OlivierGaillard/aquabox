@@ -173,10 +173,11 @@ class Ph(Probes):
         if ord(response[0]) == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
             # change MSB to 0 for all received characters except the first and get a list of characters
             #char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
+            print self.answers[self.SUCCESSFUL_REQUEST]
+            print "answer is: "
             char_list = map(lambda x: chr(ord(x)), list(response[1:]))
-            print "Super raw response: '%s'" % ''.join(char_list)
+            print ''.join(char_list)
             # NOTE: having to change the MSB to 0 is a glitch in the raspberry pi, and you shouldn't have to do this!
-            return "Command succeeded " + ''.join(char_list)  # convert the char list to a string and returns it
         else:
             return "Error " + str(ord(response[0])) + self.answers[ord(response[0])]
 
