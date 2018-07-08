@@ -71,7 +71,8 @@ class Probes:
     def set_led_off(self):
         self.write_command(self.controller.get_Led_Off_Cmd())
 
-
+    def get_state(self):
+        self.write_command('Status')
 
 
 
@@ -175,6 +176,8 @@ class Ph(Probes):
     base_bus_path = '/dev/i2c-'
     ready = True
     command = ''
+    max_tries = 50
+    tries = 0
 
 
     def __init__(self, address=default_address, bus=default_bus):
@@ -210,9 +213,8 @@ class Ph(Probes):
             print "answer:" + answer
             return answer
         elif code == self.STILL_PROCESSING_NOT_READY:
-            print "NOT READY. Waiting 5 sec"
-            time.sleep(5.0)
-            self.read_value(num_of_bytes=31)
+            print "NOT READY. "
+            return code
         else:
             print "code inconnu: (in read_value)" + str(code)
             return code
@@ -225,9 +227,17 @@ class Ph(Probes):
         time.sleep(2.0)
 
     def get_ph(self):
+        self.tries += 1 
         self.write_command(self.controller.get_ph_Cmd())
         res = self.read_value(31)
-        return res
+        if res == self.SUCCESSFULL_REQUEST:
+            return res
+        else:
+            if self.tries < self.max_tries:
+                print "trying again"
+                self.get_ph()
+            else:
+                print "unable to get get_ph"
 
 
 class Temp(Ph):

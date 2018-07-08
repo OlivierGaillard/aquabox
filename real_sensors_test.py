@@ -36,13 +36,13 @@ class TestSensors(unittest.TestCase):
             print "get pH value"
             print(ph.get_ph())
 
-    def btest_get_pH(self):
+    def test_get_pH(self):
         print "pH test: value"
         ph = Probes.factory('ph')  # real pH probe
         for i in range(0, 10):
             print(ph.get_ph())
 
-    def test_orp(self):
+    def btest_orp(self):
         print 'ORP test'
         orp = Probes.factory('orp')
         for i in range(0, 10):
