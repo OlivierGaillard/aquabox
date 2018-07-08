@@ -197,28 +197,36 @@ class Ph(Probes):
 
 
     def read_value(self, num_of_bytes=31):
+        print 'reading value..'
         # reads a specified number of bytes from I2C, then parses and displays the result
         res = self.file_read.read(num_of_bytes)  # read from the board
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
         code = ord(response[0])
         if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
+            print "successful request (in read_value)"
             char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
+            print "answer:" + answer
             return answer
         elif code == self.STILL_PROCESSING_NOT_READY:
             print "waiting 5 sec"
             time.sleep(5.0)
             self.read_value(num_of_bytes=31)
         else:
+            print "code inconnu: (in read_value)" + str(code)
             return code
 
     def write_command(self, cmd):
+        print "command sent: " + cmd
         cmd += "\00"
         self.file_write.write(cmd)
         code = self.confirm_command(num_of_bytes=1)
+        print "confirmation code : " + str(code)
         if code == self.SUCCESSFUL_REQUEST:
-            print "successful request"
+            print "successful request. Will read value..."
             self.read_value(num_of_bytes=31)
+        else:
+            print "(write_command) not successful. confirmation code : " + str(code)
 
 
     def confirm_command(self, num_of_bytes=1):
