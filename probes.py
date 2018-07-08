@@ -15,6 +15,9 @@ class ProbesController:
     def get_Led_Off_Cmd(self):
         return 'L,0'
 
+    def get_ph_Cmd(self):
+        return 'R'
+
     def translate_answer(self, answer):
         CMD_SUCCESS = 'Command succeeded'
         translations = {'Error 254' : 'Error', '?L,0' : 'Off', '?L,1' : 'On', 'Command succeeded' : 'Command succeeded' }
@@ -70,6 +73,11 @@ class Probes:
     def set_led_off(self):
         confirm_command = self.write_command(self.controller.get_Led_Off_Cmd())
         print confirm_command
+
+    def get_ph(self):
+        confirm_cmd = self.write_command(self.controller.get_ph_Cmd())
+        print confirm_cmd
+
 
     @abstractmethod
     def read_value(self):
@@ -196,6 +204,10 @@ class Ph(Probes):
         if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
             char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
+        elif code == self.STILL_PROCESSING_NOT_READY:
+            print "wainting 5 sec"
+            time.sleep(5.0)
+            self.read_value(num_of_bytes=31)
         else:
             return code
 

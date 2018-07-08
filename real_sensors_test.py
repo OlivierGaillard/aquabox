@@ -33,6 +33,8 @@ class TestSensors(unittest.TestCase):
             time.sleep(3)
             print "OFF"
             print(ph.set_led_off())
+            print "get pH value"
+            print(ph.get_ph())
 
     def btest_translate_answer(self):
         probectrl = ProbesController()
