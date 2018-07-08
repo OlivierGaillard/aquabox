@@ -91,6 +91,8 @@ class Probes:
             return Ph()
         if type == 'temp':
             return Temp(address=102)
+        if type == 'orp':
+            return Orp(address=98)
 
         assert 0, "Bad probe creation type: " + type
 
@@ -207,7 +209,7 @@ class Ph(Probes):
             print "answer:" + answer
             return answer
         elif code == self.STILL_PROCESSING_NOT_READY:
-            print "waiting 5 sec"
+            print "NOT READY. Waiting 5 sec"
             time.sleep(5.0)
             self.read_value(num_of_bytes=31)
         else:
@@ -218,8 +220,8 @@ class Ph(Probes):
         print "command sent: " + cmd
         cmd += "\00"
         self.file_write.write(cmd)
-        print 'sleeping 4 sec'
-        time.sleep(4.0)
+        print 'sleeping 2 sec'
+        time.sleep(2.0)
 
     def get_ph(self):
         self.write_command(self.controller.get_ph_Cmd())
@@ -233,3 +235,11 @@ class Temp(Ph):
         self.write_command('R')
         res = self.read_value(31)
         return res
+
+class Orp(Ph):
+
+    def get_orp(self):
+        self.write_command('R')
+        res = self.read_value(31)
+        return res
+
