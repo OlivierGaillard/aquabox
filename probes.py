@@ -204,8 +204,9 @@ class Ph(Probes):
         if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
             char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
+            return answer
         elif code == self.STILL_PROCESSING_NOT_READY:
-            print "wainting 5 sec"
+            print "waiting 5 sec"
             time.sleep(5.0)
             self.read_value(num_of_bytes=31)
         else:
@@ -214,7 +215,10 @@ class Ph(Probes):
     def write_command(self, cmd):
         cmd += "\00"
         self.file_write.write(cmd)
-        return self.confirm_command(num_of_bytes=1)
+        code = self.confirm_command(num_of_bytes=1)
+        if code == self.SUCCESSFUL_REQUEST:
+            print "successful request"
+            self.read_value(num_of_bytes=31)
 
 
     def confirm_command(self, num_of_bytes=1):
