@@ -178,6 +178,7 @@ class Ph(Probes):
     command = ''
     max_tries = 50
     tries = 0
+    success = False
 
 
     def __init__(self, address=default_address, bus=default_bus):
@@ -210,8 +211,10 @@ class Ph(Probes):
             char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
             #char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
-            print "answer:" + answer
-            return answer
+            print "answer: " + answer
+            print "trying should stop now"
+            self.success = True
+            return  answer
         elif code == self.STILL_PROCESSING_NOT_READY:
             print "NOT READY. "
             return code
@@ -223,22 +226,31 @@ class Ph(Probes):
         print "command sent: " + cmd
         cmd += "\00"
         self.file_write.write(cmd)
-        print 'sleeping 2 sec'
-        time.sleep(2.0)
+        print 'sleeping 4 sec'
+        time.sleep(4.0)
 
     def get_ph(self):
         self.tries += 1 
         self.write_command(self.controller.get_ph_Cmd())
         res = self.read_value(31)
-        if res == self.SUCCESSFUL_REQUEST:
+        if self.success:
             return res
         else:
             if self.tries < self.max_tries:
-                print "trying again"
+                if self.tries > 5:
+                    print "trying to get status before retrieving pH value"
+                    print self.get_status()
+                    print 'sleeping 2s'
+                    time.sleep(2.0)
+                print "trying again. Try: %s" % str(self.tries)
                 self.get_ph()
             else:
                 print "unable to get get_ph"
 
+    def get_status(self):
+        self.write_command('Status')
+        res = self.read_value(31)
+        return res
 
 class Temp(Ph):
 

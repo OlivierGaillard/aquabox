@@ -39,37 +39,22 @@ class TestSensors(unittest.TestCase):
     def test_get_pH(self):
         print "pH test: value"
         ph = Probes.factory('ph')  # real pH probe
-        for i in range(0, 10):
-            print(ph.get_ph())
+        print(ph.get_ph())
 
-    def btest_orp(self):
+    def test_orp(self):
         print 'ORP test'
         orp = Probes.factory('orp')
-        for i in range(0, 10):
-            print(orp.get_orp())
+        print(orp.get_orp())
 
     def btest_translate_answer(self):
         probectrl = ProbesController()
         answer = probectrl.translate_answer('Command succeeded ?L,0')
         self.assertEqual(answer, 'Off')
 
-    def btest_temperature(self):
+    def test_temperature(self):
         t = Probes.factory('temp')
-        for i in range(0,3):
-            print 'Turning Led On...'
-            t.set_led_on()
-            print 'sleeping 2 seconds'
-            time.sleep(2)
-            print 'Getting Led State...'
-            state = t.query_led_state()
-            print 'state is: ' + state
-            print 'querying temperature'
-            temp = t.get_temp()
-            print 'sleeping 3 seconds'
-            time.sleep(3.0)
-            print "temperature: " + str(temp)
-            print "set led Off"
-            t.set_led_off()
+        print 'querying temperature'
+        temp = t.get_temp()
 
 if __name__ == '__main__':
     unittest.main()
