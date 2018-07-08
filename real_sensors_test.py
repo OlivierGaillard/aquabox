@@ -23,7 +23,7 @@ class TestSensors(unittest.TestCase):
         self.user_box = boxsettings.REST_USER
         self.user_box_passwd = boxsettings.REST_PASSWORD
 
-    def test_get_real_pH_Led_state(self):
+    def btest_get_real_pH_Led_state(self):
         ph = Probes.factory('ph') # real pH probe
         for i in range(0,3):
             state = ph.query_led_state()
