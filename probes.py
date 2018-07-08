@@ -67,12 +67,11 @@ class Probes:
             return 'None'
 
     def set_led_on(self):
-        confirm_command = self.write_command(self.controller.get_Led_On_Cmd())
-        print confirm_command
+        self.write_command(self.controller.get_Led_On_Cmd())
 
     def set_led_off(self):
-        confirm_command = self.write_command(self.controller.get_Led_Off_Cmd())
-        print confirm_command
+        self.write_command(self.controller.get_Led_Off_Cmd())
+
 
     def get_ph(self):
         confirm_cmd = self.write_command(self.controller.get_ph_Cmd())
