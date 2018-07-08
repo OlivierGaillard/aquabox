@@ -23,7 +23,7 @@ class TestSensors(unittest.TestCase):
         self.user_box = boxsettings.REST_USER
         self.user_box_passwd = boxsettings.REST_PASSWORD
 
-    def test_get_real_pH_Led_state(self):
+    def btest_get_real_pH_Led_state(self):
         ph = Probes.factory('ph') # real pH probe
         for i in range(0,3):
             state = ph.query_led_state()
@@ -41,6 +41,14 @@ class TestSensors(unittest.TestCase):
         answer = probectrl.translate_answer('Command succeeded ?L,0')
         self.assertEqual(answer, 'Off')
 
+    def test_temperature(self):
+        t = Probes.factory('temp')
+        print 'Turning Led On...'
+        t.set_led_on()
+        time.sleep(2)
+        temp = t.get_temp()
+        print "temperature: " + temp
+        
 
 if __name__ == '__main__':
     unittest.main()

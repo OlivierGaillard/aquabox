@@ -93,6 +93,8 @@ class Probes:
             return MockPh()
         if type == 'ph':
             return Ph()
+        if type == 'temp':
+            return Temp()
 
         assert 0, "Bad probe creation type: " + type
 
@@ -227,3 +229,17 @@ class Ph(Probes):
         code = ord(response[0])
         print self.answers[code]
         return code
+
+
+class Temp(Ph):
+    default_address = 102
+
+    def get_temp(self):
+        code = self.write_command('R')
+        if code == self.SUCCESSFUL_REQUEST:
+            temp = self.read_value(num_of_bytes=31)
+            print temp
+            return temp
+        else:
+            print self.answers[code]
+            return code
