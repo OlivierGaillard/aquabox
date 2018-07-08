@@ -28,7 +28,11 @@ class TestSensors(unittest.TestCase):
         for i in range(0,3):
             state = ph.query_led_state()
             print "pH Led state: '%s'" % state
-        self.assertTrue(state == 'On' or state == 'Off' or state == 'Error' or state == 'Command succeeded')
+            print "ON"
+            print(ph.set_led_on())
+            time.sleep(3)
+            print "OFF"
+            print(ph.set_led_off())
 
     def btest_translate_answer(self):
         probectrl = ProbesController()

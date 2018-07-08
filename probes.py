@@ -6,9 +6,6 @@ import time
 
 class ProbesController:
 
-
-
-
     def led_State(self):
         return 'L,?'
 
@@ -55,13 +52,22 @@ class Probes:
         self.write_command(self.controller.led_State())
         time.sleep(self.long_timeout)
         response = self.read_value()
-        return self.controller.translate_answer(response)
+        if response:
+            if not response in self.answers:
+                print "response no in predefined codes: NOT ready etc"
+                print response
+                return response
+            else:
+                print "response: " + self.answers[response]
+        else:
+            print "received None"
+            return 'None'
 
     def set_led_on(self):
         self.write_command(self.controller.get_Led_On_Cmd())
 
     def set_led_off(self):
-        self.write_command(self.controller.get_led_Off_Comd())
+        self.write_command(self.controller.get_Led_Off_Cmd())
 
     @abstractmethod
     def read_value(self):
@@ -193,27 +199,13 @@ class Ph(Probes):
     def read_value(self, num_of_bytes=31):
         # reads a specified number of bytes from I2C, then parses and displays the result
         res = self.file_read.read(num_of_bytes)  # read from the board
-        print "res: " + res
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
-        print "response[0]: " + str(ord(response[0]))
-        if ord(response[0]) == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
-            # change MSB to 0 for all received characters except the first and get a list of characters
-            #char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
-            print self.answers[self.SUCCESSFUL_REQUEST]
+        code = ord(response[0])
+        if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
             char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
-            if len(answer) == 0:
-                print "answer empty"
-                print "retrying. wait 3 seconds"
-                time.sleep(3.0)
-                self.read_value(num_of_bytes=31)
-            else:
-                print "answer not empty"
-            return answer
-            # NOTE: having to change the MSB to 0 is a glitch in the raspberry pi, and you shouldn't have to do this!
         else:
-            print "error arises"
-            return self.answers[ord(response[0])]
+            return code
 
 
 
