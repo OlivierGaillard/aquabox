@@ -220,7 +220,8 @@ class Ph(Probes):
         print "command sent: " + cmd
         cmd += "\00"
         self.file_write.write(cmd)
-        time.sleep(2.0)
+        print 'sleeping 3 sec'
+        time.sleep(3.0)
 
 
 class Temp(Ph):
