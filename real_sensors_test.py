@@ -45,10 +45,15 @@ class TestSensors(unittest.TestCase):
         t = Probes.factory('temp')
         print 'Turning Led On...'
         t.set_led_on()
+        print 'sleeping 2 seconds'
         time.sleep(2)
+        print 'querying temperature'
         temp = t.get_temp()
-        print "temperature: " + temp
-        
+        print 'sleeping 3 seconds'
+        time.sleep(3.0)
+        print "temperature: " + str(temp)
+        print "set led Off"
+        t.set_led_off()
 
 if __name__ == '__main__':
     unittest.main()

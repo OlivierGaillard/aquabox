@@ -94,7 +94,7 @@ class Probes:
         if type == 'ph':
             return Ph()
         if type == 'temp':
-            return Temp()
+            return Temp(address=102)
 
         assert 0, "Bad probe creation type: " + type
 
@@ -222,7 +222,8 @@ class Ph(Probes):
         print "command sent: " + cmd
         cmd += "\00"
         self.file_write.write(cmd)
-        code = self.confirm_command(num_of_bytes=1)
+        time.sleep(1.0)
+        code = self.confirm_command(num_of_bytes=2)
         print "confirmation code : " + str(code)
         if code == self.SUCCESSFUL_REQUEST:
             print "successful request. Will read value..."
@@ -240,14 +241,17 @@ class Ph(Probes):
 
 
 class Temp(Ph):
-    default_address = 102
 
     def get_temp(self):
         code = self.write_command('R')
-        if code == self.SUCCESSFUL_REQUEST:
-            temp = self.read_value(num_of_bytes=31)
-            print temp
-            return temp
+        if code:
+            if code == self.SUCCESSFUL_REQUEST:
+                temp = self.read_value(num_of_bytes=31)
+                print temp
+                return temp
+            else:
+                print self.answers[code]
+                return code
         else:
-            print self.answers[code]
+            print 'no code. code is None'
             return code
