@@ -72,9 +72,7 @@ class Probes:
         self.write_command(self.controller.get_Led_Off_Cmd())
 
 
-    def get_ph(self):
-        confirm_cmd = self.write_command(self.controller.get_ph_Cmd())
-        print confirm_cmd
+
 
 
     @abstractmethod
@@ -220,8 +218,13 @@ class Ph(Probes):
         print "command sent: " + cmd
         cmd += "\00"
         self.file_write.write(cmd)
-        print 'sleeping 3 sec'
-        time.sleep(3.0)
+        print 'sleeping 4 sec'
+        time.sleep(4.0)
+
+    def get_ph(self):
+        self.write_command(self.controller.get_ph_Cmd())
+        res = self.read_value(31)
+        return res
 
 
 class Temp(Ph):
