@@ -204,7 +204,8 @@ class Ph(Probes):
         code = ord(response[0])
         if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
             print "successful request (in read_value)"
-            char_list = map(lambda x: chr(ord(x)), list(response[1:]))
+            char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
+            #char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
             print "answer:" + answer
             return answer
