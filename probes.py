@@ -20,7 +20,7 @@ class ProbesController:
 
     def translate_answer(self, answer):
         CMD_SUCCESS = 'Command succeeded'
-        translations = {'Error 254' : 'Error', '?L,0' : 'Off', '?L,1' : 'On', 'Command succeeded' : 'Command succeeded' }
+        translations = {'?L,0' : 'Off', '?L,1' : 'On', 'Command succeeded' : 'Command succeeded' }
         answer = answer.strip()
         if answer == CMD_SUCCESS:
             return answer
@@ -57,8 +57,7 @@ class Probes:
         response = self.read_value()
         if response:
             if not response in self.answers:
-                print "response no in predefined codes: NOT ready etc"
-                print response
+                #print self.controller.translate_answer(response)
                 return response
             else:
                 print "response: " + self.answers[response]
