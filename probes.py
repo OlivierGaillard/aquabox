@@ -122,9 +122,35 @@ class MockPh(Probes):
     def set_not_ready(self):
         self.ready = False
 
+    def create_answer(self, data):
+        ok_byte = bytearray(['1'])
+        end_data_marker = '\x00'
+        answer = ok_byte + data + end_data_marker
+        return answer
+
     def read_value(self):
         if self.command == 'L,?':
-            return '?L,0'
+            res = self.create_answer('L,0')
+            response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
+            print "response[0]: " + str(ord(response[0]))
+            if ord(response[0]) == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
+                # change MSB to 0 for all received characters except the first and get a list of characters
+                # char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
+                print self.answers[self.SUCCESSFUL_REQUEST]
+                char_list = map(lambda x: chr(ord(x)), list(response[1:]))
+                answer = ''.join(char_list)
+                if len(answer) == 0:
+                    print "answer empty"
+                    print "retrying. wait 3 seconds"
+                    time.sleep(3.0)
+                    self.read_value(num_of_bytes=31)
+                else:
+                    print "answer not empty"
+                return answer
+                # NOTE: having to change the MSB to 0 is a glitch in the raspberry pi, and you shouldn't have to do this!
+            else:
+                print "error arises"
+                return self.answers[ord(response[0])]
 
     def write_command(self, cmd):
         self.command = cmd
@@ -167,7 +193,7 @@ class Ph(Probes):
     def read_value(self, num_of_bytes=31):
         # reads a specified number of bytes from I2C, then parses and displays the result
         res = self.file_read.read(num_of_bytes)  # read from the board
-
+        print "res: " + res
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
         print "response[0]: " + str(ord(response[0]))
         if ord(response[0]) == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
