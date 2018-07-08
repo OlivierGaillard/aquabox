@@ -230,7 +230,7 @@ class Ph(Probes):
         self.tries += 1 
         self.write_command(self.controller.get_ph_Cmd())
         res = self.read_value(31)
-        if res == self.SUCCESSFULL_REQUEST:
+        if res == self.SUCCESSFUL_REQUEST:
             return res
         else:
             if self.tries < self.max_tries:
