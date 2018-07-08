@@ -64,10 +64,12 @@ class Probes:
             return 'None'
 
     def set_led_on(self):
-        self.write_command(self.controller.get_Led_On_Cmd())
+        confirm_command = self.write_command(self.controller.get_Led_On_Cmd())
+        print confirm_command
 
     def set_led_off(self):
-        self.write_command(self.controller.get_Led_Off_Cmd())
+        confirm_command = self.write_command(self.controller.get_Led_Off_Cmd())
+        print confirm_command
 
     @abstractmethod
     def read_value(self):
@@ -112,18 +114,8 @@ class MockPh(Probes):
 
 
     def set_i2c_address(self, addr):
-        # set the I2C communications to the slave specified by the address
-        # The commands for I2C dev using the ioctl functions are specified in
-        # the i2c-dev.h file from i2c-tools
         I2C_SLAVE = 0x703
-        # fcntl.ioctl(self.file_read, I2C_SLAVE, addr)
-        # fcntl.ioctl(self.file_write, I2C_SLAVE, addr)
         self.current_addr = addr
-
-    # def write(self, cmd):
-    #     # appends the null character and sends the string over I2C
-    #     cmd += "\00"
-    #     self.file_write.write(cmd)
 
     def set_not_ready(self):
         self.ready = False
@@ -207,8 +199,15 @@ class Ph(Probes):
         else:
             return code
 
-
-
     def write_command(self, cmd):
         cmd += "\00"
         self.file_write.write(cmd)
+        return self.confirm_command(num_of_bytes=1)
+
+
+    def confirm_command(self, num_of_bytes=1):
+        res = self.file_read.read(num_of_bytes)  # read from the board
+        response = filter(lambda x: x != '\x00', res)  # remove the null charac
+        code = ord(response[0])
+        print self.answers[code]
+        return code
