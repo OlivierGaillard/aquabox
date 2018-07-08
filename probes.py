@@ -222,36 +222,12 @@ class Ph(Probes):
         print "command sent: " + cmd
         cmd += "\00"
         self.file_write.write(cmd)
-        time.sleep(1.0)
-        code = self.confirm_command(num_of_bytes=2)
-        print "confirmation code : " + str(code)
-        if code == self.SUCCESSFUL_REQUEST:
-            print "successful request. Will read value..."
-            self.read_value(num_of_bytes=31)
-        else:
-            print "(write_command) not successful. confirmation code : " + str(code)
-
-
-    def confirm_command(self, num_of_bytes=1):
-        res = self.file_read.read(num_of_bytes)  # read from the board
-        response = filter(lambda x: x != '\x00', res)  # remove the null charac
-        code = ord(response[0])
-        print self.answers[code]
-        return code
+        time.sleep(2.0)
 
 
 class Temp(Ph):
 
     def get_temp(self):
-        code = self.write_command('R')
-        if code:
-            if code == self.SUCCESSFUL_REQUEST:
-                temp = self.read_value(num_of_bytes=31)
-                print temp
-                return temp
-            else:
-                print self.answers[code]
-                return code
-        else:
-            print 'no code. code is None'
-            return code
+        self.write_command('R')
+        res = self.read_value(31)
+        return res
