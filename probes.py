@@ -111,7 +111,7 @@ class I2Connector:
     file_write = None
     file_read  = None
 
-    def __init__(self, address):
+    def __init__(self, address, bus=default_bus):
         self.current_address = address
         self.file_write = open(self.base_bus_path + str(bus), "wb", buffering=0)
         self.file_read = open(self.base_bus_path + str(bus), "rb", buffering=0)
