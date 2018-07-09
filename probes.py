@@ -110,8 +110,8 @@ class I2Connector:
 
     def __init__(self, address):
         self.current_address = address
-        self.file_write = open(self.base_bus_path + str(bus), "wb", buffering=0)
-        self.file_read = open(self.base_bus_path + str(bus), "rb", buffering=0)
+        self.file_write = open(self.base_bus_path + str(self.default_bus), "wb", buffering=0)
+        self.file_read = open(self.base_bus_path + str(self.default_bus), "rb", buffering=0)
         self.set_i2c_address(address)
 
     def set_i2c_address(self, addr):
