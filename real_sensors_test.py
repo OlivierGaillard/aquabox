@@ -39,7 +39,9 @@ class TestSensors(unittest.TestCase):
     def test_get_pH(self):
         print "pH test: value"
         ph = Probes.factory('ph')  # real pH probe
-        print(ph.get_ph())
+        ph_value = ph.get_ph()
+        print('pH is : %s' % ph_value)
+        self.assertTrue(float(ph_value) > 0.0)
 
     def test_orp(self):
         print 'ORP test'

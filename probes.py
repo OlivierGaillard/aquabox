@@ -142,6 +142,7 @@ class Ph(Probes):
     max_tries = 50
     tries = 0
     success = False
+    ph_value = 0.0
 
 
     def __init__(self, address=default_address, bus=default_bus):
@@ -199,19 +200,17 @@ class Ph(Probes):
         self.tries += 1 
         self.write_command(self.controller.get_ph_Cmd())
         res = self.read_value(31)
+        print "res before test (get_ph)" + str(res)
         if self.success:
+            print "will return the pH" + str(res)
+            self.ph_value = res
             return res
         else:
             if self.tries < self.max_tries:
-                if self.tries > 5:
-                    print "trying to get status before retrieving pH value"
-                    print self.get_status()
-                    print 'sleeping 2s'
-                    time.sleep(2.0)
-                print "trying again. Try: %s" % str(self.tries)
                 self.get_ph()
             else:
                 print "unable to get get_ph"
+                return 0.0
 
     def get_status(self):
         self.write_command('Status')
