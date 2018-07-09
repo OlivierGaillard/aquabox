@@ -34,7 +34,7 @@ class TestSensors(unittest.TestCase):
             print "OFF"
             print(ph.set_led_off())
             print "get pH value"
-            print(ph.get_ph())
+            print(ph.get_value())
 
     def test_get_pH(self):
         print "pH test: value"

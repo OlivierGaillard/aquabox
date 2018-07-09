@@ -142,7 +142,7 @@ class Ph(Probes):
     max_tries = 50
     tries = 0
     success = False
-    ph_value = 0.0
+    probe_value = 0.0
 
 
     def __init__(self, address=default_address, bus=default_bus):
@@ -167,7 +167,6 @@ class Ph(Probes):
         self.current_addr = addr
 
     def write_command(self, cmd):
-        print "command sent: " + cmd
         cmd += "\00"
         self.file_write.write(cmd)
         print 'sleeping 4 sec'
@@ -184,40 +183,39 @@ class Ph(Probes):
             print "answer: " + answer
             print "trying should stop now"
             self.success = True
-            self.ph_value = answer
+            self.probe_value = answer
         elif code == self.STILL_PROCESSING_NOT_READY:
             print "NOT READY. "
         else:
             print "code inconnu: (in read_value)" + str(code)
 
 
-    def get_ph(self):
+    def get_value(self):
         nb = 0
         while self.success == False and nb < self.max_tries:
             nb += 1
             print "Nb. %s" % nb
             self.write_command(self.controller.get_ph_Cmd())
             self.read_value(31)
-        return self.ph_value
+        return self.probe_value
 
     def get_status(self):
         self.write_command('Status')
         res = self.read_value(31)
         return res
 
+    def get_ph(self):
+        return self.get_value()
+
 class Temp(Ph):
 
     def get_temp(self):
-        self.write_command('R')
-        res = self.read_value(31)
-        return res
+        return self.get_value()
 
 class Orp(Ph):
 
     def get_orp(self):
-        self.write_command('R')
-        res = self.read_value(31)
-        return res
+        return self.get_value()
 
 class MockPh(Ph):
     """
@@ -292,7 +290,7 @@ class MockPh(Ph):
         self.__fake_write(cmd)
 
 
-    def get_ph(self):
+    def get_value(self):
         self.tries += 1
         self.write_command(self.controller.get_ph_Cmd())
         res = self.read_value(31)
@@ -306,6 +304,6 @@ class MockPh(Ph):
                     print 'sleeping 2s'
                     time.sleep(2.0)
                 print "trying again. Try: %s" % str(self.tries)
-                self.get_ph()
+                self.get_value()
             else:
                 print "unable to get get_ph"
