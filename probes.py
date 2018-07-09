@@ -175,42 +175,32 @@ class Ph(Probes):
 
 
     def read_value(self, num_of_bytes=31):
-        print 'reading value..'
-        # reads a specified number of bytes from I2C, then parses and displays the result
         res = self.file_read.read(num_of_bytes)  # read from the board
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
         code = ord(response[0])
         if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
-            print "successful request (in read_value)"
             char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
-            #char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
             print "answer: " + answer
             print "trying should stop now"
             self.success = True
-            return  answer
+            self.ph_value = answer
         elif code == self.STILL_PROCESSING_NOT_READY:
             print "NOT READY. "
-            return code
         else:
             print "code inconnu: (in read_value)" + str(code)
-            return code
+
 
     def get_ph(self):
         self.tries += 1 
         self.write_command(self.controller.get_ph_Cmd())
-        res = self.read_value(31)
-        print "res before test (get_ph)" + str(res)
-        if self.success:
-            print "will return the pH" + str(res)
-            self.ph_value = str(res)
-            return str(res)
-        else:
-            if self.tries < self.max_tries:
-                self.get_ph()
-            else:
-                print "unable to get get_ph"
-                return 0.0
+        self.read_value(31)
+        nb = 0
+        while self.success == False and self.tries < self.max_tries:
+            nb += 1
+            print "Nb. %s" % nb
+            self.get_ph()
+        return self.ph_value
 
     def get_status(self):
         self.write_command('Status')
