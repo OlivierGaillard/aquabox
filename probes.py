@@ -203,8 +203,8 @@ class Ph(Probes):
         print "res before test (get_ph)" + str(res)
         if self.success:
             print "will return the pH" + str(res)
-            self.ph_value = res
-            return res
+            self.ph_value = str(res)
+            return str(res)
         else:
             if self.tries < self.max_tries:
                 self.get_ph()
