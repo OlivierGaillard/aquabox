@@ -100,68 +100,31 @@ class Probes:
 
 
 
-class MockPh(Probes):
-    """
-    Simulates a pH probe: receives commands and will answer.
-    """
 
+class I2Connector:
+    long_timeout = 1.5  # the timeout needed to query readings and calibrations
+    short_timeout = .5  # timeout for regular commands
     default_address = 99
     current_address = default_address
     default_bus = 1
-    base_bus_path = 'i2c-'
-    ready = True
-    command = ''
+    base_bus_path = '/dev/i2c-'
+    file_write = None
+    file_read  = None
 
-
-    def __init__(self, address=default_address, bus=default_bus):
-
+    def __init__(self, address):
+        self.current_address = address
         self.file_write = open(self.base_bus_path + str(bus), "wb", buffering=0)
-        self.file_read  = open(self.base_bus_path + str(bus), "rb", buffering=0)
-        # initializes I2C to either a user specified or default address
+        self.file_read = open(self.base_bus_path + str(bus), "rb", buffering=0)
         self.set_i2c_address(address)
-        self.controller = ProbesController()
-
 
     def set_i2c_address(self, addr):
+        # set the I2C communications to the slave specified by the address
+        # The commands for I2C dev using the ioctl functions are specified in
+        # the i2c-dev.h file from i2c-tools
         I2C_SLAVE = 0x703
+        fcntl.ioctl(self.file_read, I2C_SLAVE, addr)
+        fcntl.ioctl(self.file_write, I2C_SLAVE, addr)
         self.current_addr = addr
-
-    def set_not_ready(self):
-        self.ready = False
-
-    def create_answer(self, data):
-        ok_byte = bytearray(['1'])
-        end_data_marker = '\x00'
-        answer = ok_byte + data + end_data_marker
-        return answer
-
-    def read_value(self):
-        if self.command == 'L,?':
-            res = self.create_answer('L,0')
-            response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
-            print "response[0]: " + str(ord(response[0]))
-            if ord(response[0]) == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
-                # change MSB to 0 for all received characters except the first and get a list of characters
-                # char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
-                print self.answers[self.SUCCESSFUL_REQUEST]
-                char_list = map(lambda x: chr(ord(x)), list(response[1:]))
-                answer = ''.join(char_list)
-                if len(answer) == 0:
-                    print "answer empty"
-                    print "retrying. wait 3 seconds"
-                    time.sleep(3.0)
-                    self.read_value(num_of_bytes=31)
-                else:
-                    print "answer not empty"
-                return answer
-                # NOTE: having to change the MSB to 0 is a glitch in the raspberry pi, and you shouldn't have to do this!
-            else:
-                print "error arises"
-                return self.answers[ord(response[0])]
-
-    def write_command(self, cmd):
-        self.command = cmd
-
 
 
 class Ph(Probes):
@@ -266,3 +229,93 @@ class Orp(Ph):
         res = self.read_value(31)
         return res
 
+class MockPh(Ph):
+    """
+    Simulates a pH probe: receives commands and will answer.
+    """
+
+    ready = True
+    command = ''
+    answer = ''
+
+    led_state = ord('L') + ord(',') + ord('0')
+    ph = 7.001
+
+    def __init__(self):
+        self.controller = ProbesController()
+
+    def _convert_to_ascii(self, str):
+        tmp = ''
+        for s in str:
+            tmp += chr(ord(s))
+        return tmp
+
+    def set_led_on(self):
+        self.led_state = ord('1')
+
+    def set_led_off(self):
+        self.led_state = ord('0')
+
+    def get_state(self):
+        return self.led_state
+
+    def __fake_answer(self, cmd):
+        """Build answer based on commmand"""
+        if cmd == 'L,?':
+            self.answer =  self.get_state()
+
+    def __fake_write(self, cmd):
+        if cmd == 'L,1':
+            self.set_led_on()
+        if cmd == 'L,0':
+            self.set_led_off()
+
+
+    def create_answer(self):
+        ok_byte = bytes(1) # bytearray(['1'])
+        end_data_marker = '\x00'
+        self.answer = ok_byte + self.answer + end_data_marker
+
+    def read_value(self, num_of_bytes=31):
+        print 'reading value..'
+        res = self.create_answer()
+        response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
+        code = response[0]
+        if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
+            print "successful request (in read_value)"
+            char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
+            #char_list = map(lambda x: chr(ord(x)), list(response[1:]))
+            answer =  ''.join(char_list)
+            print "answer: " + answer
+            print "trying should stop now"
+            self.success = True
+            return  answer
+        elif code == self.STILL_PROCESSING_NOT_READY:
+            print "NOT READY. "
+            return code
+        else:
+            print "code inconnu: (in read_value)" + str(code)
+            return code
+
+    def write_command(self, cmd):
+        self.command = cmd
+        self.__fake_write(cmd)
+
+
+    def get_ph(self):
+        self.tries += 1
+        self.write_command(self.controller.get_ph_Cmd())
+        res = self.read_value(31)
+        if self.success:
+            return res
+        else:
+            if self.tries < self.max_tries:
+                if self.tries > 5:
+                    print "trying to get status before retrieving pH value"
+                    print self.get_status()
+                    print 'sleeping 2s'
+                    time.sleep(2.0)
+                print "trying again. Try: %s" % str(self.tries)
+                self.get_ph()
+            else:
+                print "unable to get get_ph"
