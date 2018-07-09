@@ -146,11 +146,14 @@ class Ph(Probes):
 
     def __init__(self, address=default_address, bus=default_bus):
 
-        self.file_write = open(self.base_bus_path + str(bus), "wb", buffering=0)
-        self.file_read  = open(self.base_bus_path + str(bus), "rb", buffering=0)
+        #self.file_write = open(self.base_bus_path + str(bus), "wb", buffering=0)
+        #self.file_read  = open(self.base_bus_path + str(bus), "rb", buffering=0)
         # initializes I2C to either a user specified or default address
-        self.set_i2c_address(address)
+        #self.set_i2c_address(address)
         self.controller = ProbesController()
+        self.connector = I2Connector(address=address)
+        self.file_write = self.connector.file_write
+        self.file_read  = self.connector.file_read
 
 
     def set_i2c_address(self, addr):
