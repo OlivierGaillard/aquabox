@@ -166,6 +166,13 @@ class Ph(Probes):
         fcntl.ioctl(self.file_write, I2C_SLAVE, addr)
         self.current_addr = addr
 
+    def write_command(self, cmd):
+        print "command sent: " + cmd
+        cmd += "\00"
+        self.file_write.write(cmd)
+        print 'sleeping 4 sec'
+        time.sleep(4.0)
+
 
     def read_value(self, num_of_bytes=31):
         print 'reading value..'
@@ -188,13 +195,6 @@ class Ph(Probes):
         else:
             print "code inconnu: (in read_value)" + str(code)
             return code
-
-    def write_command(self, cmd):
-        print "command sent: " + cmd
-        cmd += "\00"
-        self.file_write.write(cmd)
-        print 'sleeping 4 sec'
-        time.sleep(4.0)
 
     def get_ph(self):
         self.tries += 1 
