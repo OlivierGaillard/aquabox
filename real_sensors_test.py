@@ -8,9 +8,6 @@ from probes import Probes, ProbesController
 import time
 
 
-
-
-
 class TestSensors(unittest.TestCase):
     """This class simulates the work of the sensors box (Raspberry Pi).
     It can be used on the rapsberry-pi and should to test the REST service.

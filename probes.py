@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 import io
 import fcntl
 import time
+import boxsettings
 
 class ProbesController:
 
@@ -89,11 +90,11 @@ class Probes:
         if type == 'mock_ph':
             return MockPh()
         if type == 'ph':
-            return Ph(address=99)
+            return Ph(address=boxsettings.PH_ADDRESS)
         if type == 'temp':
-            return Temp(address=102)
+            return Temp(address=boxsettings.TEMP_ADDRESS)
         if type == 'orp':
-            return Orp(address=98)
+            return Orp(address=boxsettings.ORP_ADDRESS)
 
         assert 0, "Bad probe creation type: " + type
 

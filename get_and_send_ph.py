@@ -5,7 +5,7 @@ from restclient import Sender
 import boxsettings
 import sleep
 import random
-from i2c import AtlasI2C
+from probes import Probes
 
 logname = '/home/pi/phweb/box/rest.log'
 logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
