@@ -147,24 +147,11 @@ class Ph(Probes):
 
     def __init__(self, address=default_address, bus=default_bus):
 
-        #self.file_write = open(self.base_bus_path + str(bus), "wb", buffering=0)
-        #self.file_read  = open(self.base_bus_path + str(bus), "rb", buffering=0)
-        # initializes I2C to either a user specified or default address
-        #self.set_i2c_address(address)
         self.controller = ProbesController()
         self.connector = I2Connector(address=address)
         self.file_write = self.connector.file_write
         self.file_read  = self.connector.file_read
 
-
-    def set_i2c_address(self, addr):
-        # set the I2C communications to the slave specified by the address
-        # The commands for I2C dev using the ioctl functions are specified in
-        # the i2c-dev.h file from i2c-tools
-        I2C_SLAVE = 0x703
-        fcntl.ioctl(self.file_read, I2C_SLAVE, addr)
-        fcntl.ioctl(self.file_write, I2C_SLAVE, addr)
-        self.current_addr = addr
 
     def write_command(self, cmd):
         cmd += "\00"
