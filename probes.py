@@ -192,14 +192,12 @@ class Ph(Probes):
 
 
     def get_ph(self):
-        self.tries += 1 
-        self.write_command(self.controller.get_ph_Cmd())
-        self.read_value(31)
         nb = 0
-        while self.success == False and self.tries < self.max_tries:
+        while self.success == False and nb < self.max_tries:
             nb += 1
             print "Nb. %s" % nb
-            self.get_ph()
+            self.write_command(self.controller.get_ph_Cmd())
+            self.read_value(31)
         return self.ph_value
 
     def get_status(self):
