@@ -38,7 +38,8 @@ class Sender:
     def send_deg(self, value):
         """A relever: la cle json 'celsius' est identique au champ de la table
         'Deg'. """
-        value_str = "{0:.3f}".format(value)
+#        value_str = "{0:.3f}".format(value)
+        value_str = str(value)
         json = {'celsius': value_str}
         url = self.live_server_url + '/deg/'
         return self.__send_data(json, '/deg/')
@@ -60,13 +61,16 @@ class Sender:
 
 
     def send_ph(self, value):
-        value_str = "{0:.3f}".format(value)
+        #value_str = "{0:.3f}" .format(value)
+        print(value)
+        value_str = str(value)
         json = {'phval': value_str}
         url = self.live_server_url + '/ph/'
         return self.__send_data(json, '/ph/')
 
     def send_redox(self, value):
-        value_str = "{0:.1f}".format(value)
+        #value_str = "{0:.1f}" % value
+        value_str = str(value)
         json = {'redoxval': value_str}
         url = self.live_server_url + '/redox/'
         return self.__send_data(json, '/redox/')

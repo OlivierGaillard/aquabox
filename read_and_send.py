@@ -1,5 +1,4 @@
 #!/usr/bin/python
-import serial
 import logging
 from restclient import Sender
 import boxsettings
@@ -39,9 +38,9 @@ class PoolMaster:
     def send_measures(self):
         logging.debug('Sending measures..')
         sender = Sender()
-        sender.send_ph(self.ph)
         sender.send_redox(self.orp_value)
         sender.send_deg(self.temp_value)
+        sender.send_ph(self.ph_value)
         logging.debug('END sending.')
 
 
@@ -50,7 +49,7 @@ class PoolMaster:
 def main():
     poolMaster = PoolMaster()
     poolMaster.read_measures()
-    poolMaster.send_measures()
+    #poolMaster.send_measures()
 
 if __name__ == '__main__':
     main()

@@ -61,9 +61,9 @@ class Probes:
                 #print self.controller.translate_answer(response)
                 return response
             else:
-                print "response: " + self.answers[response]
+                print ("response: " + self.answers[response])
         else:
-            print "received None"
+            print ("received None")
             return 'None'
 
     def set_led_on(self):
@@ -152,7 +152,7 @@ class Ph(Probes):
     def write_command(self, cmd):
         cmd += "\00"
         self.file_write.write(cmd)
-        print 'sleeping %s sec' % self.long_timeout
+        print ('sleeping %s sec' % self.long_timeout)
         time.sleep(self.long_timeout)
 
 
@@ -166,16 +166,16 @@ class Ph(Probes):
             self.success = True
             self.probe_value = answer
         elif code == self.STILL_PROCESSING_NOT_READY:
-            print "NOT READY. "
+            print ("NOT READY. ")
         else:
-            print "code inconnu: (in read_value)" + str(code)
+            print ("code inconnu: (in read_value)" + str(code))
 
 
     def get_value(self):
         nb = 0
         while self.success == False and nb < self.max_tries:
             nb += 1
-            print "Nb. %s" % nb
+            print ("Nb. %s" % nb)
             self.write_command(self.controller.get_ph_Cmd())
             self.read_value(31)
         return self.probe_value
@@ -246,24 +246,18 @@ class MockPh(Ph):
         self.answer = ok_byte + self.answer + end_data_marker
 
     def read_value(self, num_of_bytes=31):
-        print 'reading value..'
         res = self.create_answer()
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
         code = response[0]
         if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
-            print "successful request (in read_value)"
             char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
             #char_list = map(lambda x: chr(ord(x)), list(response[1:]))
             answer =  ''.join(char_list)
-            print "answer: " + answer
-            print "trying should stop now"
             self.success = True
             return  answer
         elif code == self.STILL_PROCESSING_NOT_READY:
-            print "NOT READY. "
             return code
         else:
-            print "code inconnu: (in read_value)" + str(code)
             return code
 
     def write_command(self, cmd):
@@ -280,11 +274,7 @@ class MockPh(Ph):
         else:
             if self.tries < self.max_tries:
                 if self.tries > 5:
-                    print "trying to get status before retrieving pH value"
-                    print self.get_status()
-                    print 'sleeping 2s'
                     time.sleep(2.0)
-                print "trying again. Try: %s" % str(self.tries)
                 self.get_value()
             else:
-                print "unable to get get_ph"
+                print ("unable to get get_ph")
