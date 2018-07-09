@@ -89,16 +89,13 @@ class Probes:
         if type == 'mock_ph':
             return MockPh()
         if type == 'ph':
-            return Ph()
+            return Ph(address=99)
         if type == 'temp':
             return Temp(address=102)
         if type == 'orp':
             return Orp(address=98)
 
         assert 0, "Bad probe creation type: " + type
-
-
-
 
 
 class I2Connector:
@@ -111,7 +108,7 @@ class I2Connector:
     file_write = None
     file_read  = None
 
-    def __init__(self, address, bus=default_bus):
+    def __init__(self, address):
         self.current_address = address
         self.file_write = open(self.base_bus_path + str(bus), "wb", buffering=0)
         self.file_read = open(self.base_bus_path + str(bus), "rb", buffering=0)
@@ -135,8 +132,6 @@ class Ph(Probes):
     short_timeout = .5  # timeout for regular commands
     default_address = 99
     current_address = default_address
-    default_bus = 1
-    base_bus_path = '/dev/i2c-'
     ready = True
     command = ''
     max_tries = 50
@@ -145,7 +140,7 @@ class Ph(Probes):
     probe_value = 0.0
 
 
-    def __init__(self, address=default_address, bus=default_bus):
+    def __init__(self, address=default_address):
 
         self.controller = ProbesController()
         self.connector = I2Connector(address=address)
@@ -156,8 +151,8 @@ class Ph(Probes):
     def write_command(self, cmd):
         cmd += "\00"
         self.file_write.write(cmd)
-        print 'sleeping 4 sec'
-        time.sleep(4.0)
+        print 'sleeping %s sec' % self.long_timeout
+        time.sleep(self.long_timeout)
 
 
     def read_value(self, num_of_bytes=31):
@@ -167,8 +162,6 @@ class Ph(Probes):
         if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
             char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
             answer =  ''.join(char_list)
-            print "answer: " + answer
-            print "trying should stop now"
             self.success = True
             self.probe_value = answer
         elif code == self.STILL_PROCESSING_NOT_READY:
