@@ -8,6 +8,10 @@ import sys
 import logging
 from restclient import Sender
 
+logname = '/home/pi/phweb/box/rest.log'
+logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a',
+                    level=logging.DEBUG)
+
 DELTA_MIN = 10
 def main():
     # Rely on RTC to keep the time
