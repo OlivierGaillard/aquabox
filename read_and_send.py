@@ -13,11 +13,11 @@ class PoolMaster:
 
     def __init__(self):
         self.ph = Probes.factory('ph')
-        self.ph_value = 0.0
+        self.ph_value = 0.001
         self.orp = Probes.factory('orp')
-        self.orp_value = 0.0
+        self.orp_value = 0.1
         self.temp = Probes.factory('temp')
-        self.temp_value = 0.0
+        self.temp_value = 0.001
 
     def read_measures(self):
         logging.info("Begin readings...")

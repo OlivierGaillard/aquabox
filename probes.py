@@ -4,6 +4,10 @@ import io
 import fcntl
 import time
 import boxsettings
+import logging
+
+logname = '/home/pi/phweb/box/rest.log'
+logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a', level=logging.DEBUG)
 
 class ProbesController:
 
@@ -178,6 +182,10 @@ class Ph(Probes):
             nb += 1
             self.write_command(self.controller.get_ph_Cmd())
             self.read_value(31)
+        if self.success:
+            logging.info("Success: value read in %s times." % nb)
+        else:
+            logging.warning('Fail: unable to read value. Returning default (0.0) Tried %s times.' % nb)
         return self.probe_value
 
     def get_status(self):
