@@ -19,8 +19,6 @@ class Sender:
         url = self.live_server_url + urlsuffix
         logging.info('REST url: %s' % url)
         logging.info('JSON: %s'     % json)
-        logging.info('User: %s'     % self.user_box)
-        logging.info('Passwd: %s'   % self.user_box_passwd)
         r = requests.post(url, json=json, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 201:
             logging.fatal("Cannot reach REST service: %s", url)
@@ -56,7 +54,7 @@ class Sender:
         return self.__send_data(json, '/ph/')
 
     def send_redox(self, value):
-        value_str = '%.3f' % value
+        value_str = '%.1f' % value
         json = {'redoxval': value_str}
         return self.__send_data(json, '/redox/')
 

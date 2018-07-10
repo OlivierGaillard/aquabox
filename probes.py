@@ -58,7 +58,6 @@ class Probes:
         response = self.read_value()
         if response:
             if not response in self.answers:
-                #print self.controller.translate_answer(response)
                 return response
             else:
                 print ("response: " + self.answers[response])
@@ -152,7 +151,7 @@ class Ph(Probes):
     def write_command(self, cmd):
         cmd += "\00"
         self.file_write.write(cmd)
-        print ('sleeping %s sec' % self.long_timeout)
+        #print ('sleeping %s sec' % self.long_timeout)
         time.sleep(self.long_timeout)
 
 
@@ -166,16 +165,17 @@ class Ph(Probes):
             self.success = True
             self.probe_value = answer
         elif code == self.STILL_PROCESSING_NOT_READY:
-            print ("NOT READY. ")
+            #print ("NOT READY. ")
+            pass
         else:
             print ("code inconnu: (in read_value)" + str(code))
+
 
 
     def get_value(self):
         nb = 0
         while self.success == False and nb < self.max_tries:
             nb += 1
-            print ("Nb. %s" % nb)
             self.write_command(self.controller.get_ph_Cmd())
             self.read_value(31)
         return self.probe_value
