@@ -1,4 +1,5 @@
 import requests
+import logging
 import unittest
 import random
 from restclient import Sender
@@ -46,7 +47,7 @@ class TestApi(unittest.TestCase):
 
     def btest_sender_deg(self):
         sender = Sender()
-        for i in range(0,8):
+        for i in range(0,2):
             if i % 2:
                 pass
             else:
@@ -66,9 +67,11 @@ class TestApi(unittest.TestCase):
         status_code = sender.del_deg(id)
         self.assertEqual(200, status_code)
 
-    def btest_sender_ph(self):
+    def test_sender_ph(self):
+        logging.info('pH sending test')
         sender = Sender()
         response = sender.send_ph(self.get_random_ph())
+        logging.info('pH sent. Response: %s' response.status_code)
         self.assertEqual(201, response.status_code)
 
     def btest_sender_redox(self):
@@ -97,4 +100,7 @@ class TestApi(unittest.TestCase):
 
 
 if __name__ == '__main__':
+    logname = '/home/pi/phweb/box/rest.log'
+    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a', level=logging.DEBUG)
+
     unittest.main()
