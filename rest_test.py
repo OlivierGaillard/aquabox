@@ -45,7 +45,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(type(results), list)
 
 
-    def test_sender_deg(self):
+    def btest_sender_deg(self):
         logging.info('testing deg send...')
         sender = Sender()
         for i in range(0,2):
@@ -69,20 +69,20 @@ class TestApi(unittest.TestCase):
         status_code = sender.del_deg(id)
         self.assertEqual(200, status_code)
 
-    def test_sender_ph(self):
+    def btest_sender_ph(self):
         logging.info('pH sending test')
         sender = Sender()
         response = sender.send_ph(self.get_random_ph())
         logging.info('pH sent. Response: %s' % response.status_code)
         self.assertEqual(201, response.status_code)
 
-    def test_sender_redox(self):
+    def btest_sender_redox(self):
         sender = Sender()
         value = self.get_random_redox()
         response = sender.send_redox(value)
         self.assertEqual(201, response.status_code)
 
-    def test_sender_deg_last(self):
+    def btest_sender_deg_last(self):
         """Get last value saved"""
         sender = Sender()
         response = sender.deg_last()
@@ -99,10 +99,20 @@ class TestApi(unittest.TestCase):
         self.assertIsNotNone(enable_shutdown, "REST returned None in place of true / false")
 
 
+    def test_get_update_instruction(self):
+        sender = Sender()
+        do_update = sender.get_update_settings()
+        if do_update:
+            print('Update will be made.')
+        else:
+            print('No update')
+        self.assertIsNotNone(do_update, "REST returned None in place of true / false")
+
+
 
 if __name__ == '__main__':
-    logname = '/home/pi/phweb/box/rest.log'
-    #logname = 'rest.log'
+    #logname = '/home/pi/phweb/box/rest.log'
+    logname = 'rest.log'
     logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a', level=logging.DEBUG)
 
     unittest.main()

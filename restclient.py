@@ -97,6 +97,16 @@ class Sender:
             pass
         return enable_shutdown
 
+    def get_update_settings(self):
+        do_update = None
+        try:
+            values = self.get_piscine_settings() # Json object
+            do_update = values['do_update']
+            logging.info("Making update or not? Answer: %s" % do_update)
+        except:
+            pass
+        return do_update
+
 
 if __name__ == '__main__':
     sender = Sender()
