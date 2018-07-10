@@ -71,7 +71,7 @@ class TestApi(unittest.TestCase):
         logging.info('pH sending test')
         sender = Sender()
         response = sender.send_ph(self.get_random_ph())
-        logging.info('pH sent. Response: %s' response.status_code)
+        logging.info('pH sent. Response: %s' % response.status_code)
         self.assertEqual(201, response.status_code)
 
     def btest_sender_redox(self):
