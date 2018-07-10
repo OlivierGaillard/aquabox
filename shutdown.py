@@ -58,7 +58,7 @@ def main():
     do_update = sender.get_update_settings()
     if do_update:
         logging.info('We will make a git pull')
-        subprocess.call(["git pull"])
+        subprocess.call(["git", "pull"])
         logging.info('Update done')
     else:
         logging.info('We do NOT make a git pull')
