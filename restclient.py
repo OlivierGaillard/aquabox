@@ -19,6 +19,7 @@ class Sender:
         url = self.live_server_url + urlsuffix
         logging.info('REST url: %s' % url)
         logging.info('JSON: %s'     % json)
+        logging.info('User: %s'     % self.user_box)
         r = requests.post(url, json=json, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 201:
             logging.fatal("Cannot reach REST service: %s", url)
