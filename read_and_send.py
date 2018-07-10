@@ -5,6 +5,8 @@ import boxsettings
 import sleep
 import random
 from probes import Probes
+import shutdown
+import time
 
 class PoolMaster:
     """
@@ -37,13 +39,10 @@ class PoolMaster:
         sender = Sender()
         logging.info('orp...')
         sender.send_redox(float(self.orp_value))
-        logging.info('sent.')
-        logging.info('temp...')
+        logging.info('temperature...')
         sender.send_deg(float(self.temp_value))
-        logging.info('sent.')
         logging.info('pH...')
         sender.send_ph(float(self.ph_value))
-        logging.info('sent.')
         logging.debug('END sending.')
 
 
@@ -52,10 +51,14 @@ class PoolMaster:
 def main():
     logname = '/home/pi/phweb/box/rest.log'
     logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a', level=logging.DEBUG)
-    logging.info('info test')
+    logging.info('Waiting 30 sec to allow network to be up.')
+    time.sleep(30)
+    logging.info('PoolMaster starts the job')
     poolMaster = PoolMaster()
     poolMaster.read_measures()
     poolMaster.send_measures()
+    logging.info('End of JOG')
+    shutdown.main()
 
 if __name__ == '__main__':
     main()

@@ -8,7 +8,7 @@ import sys
 import logging
 from restclient import Sender
 
-
+DELTA_MIN = 10
 def main():
     # Rely on RTC to keep the time
     subprocess.call(["sudo", "hwclock", "--hctosys"])
@@ -30,8 +30,8 @@ def main():
     a['day'] = 'EVERY_DAY'
     a['hour'] = 'EVERY_HOUR'
     t = datetime.datetime.utcnow()
-    # a['minute'] = (t.minute + DELTA_MIN) % 60
-    a['minute'] = 0
+    a['minute'] = (t.minute + DELTA_MIN) % 60
+    #a['minute'] = 0
     a['second'] = 0
     status = pj.rtcAlarm.SetAlarm(a)
     if status['error'] != 'NO_ERROR':
@@ -44,7 +44,7 @@ def main():
 
     # Enable wakeup, otherwise power to the RPi will not be
     # applied when the RTC alarm goes off
-    pj.rtcAlarm.SetWakeupEnabled(False) # True
+    pj.rtcAlarm.SetWakeupEnabled(True)
     time.sleep(0.4)
 
     # PiJuice shuts down power to Rpi after 20 sec from now
