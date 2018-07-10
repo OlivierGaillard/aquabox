@@ -6,12 +6,6 @@ import sleep
 import random
 from probes import Probes
 
-logname = '/home/pi/phweb/box/rest.log'
-logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
-                    filemode='a', level=logging.DEBUG)
-
-
-
 class PoolMaster:
     """
     This class use one factory to use the pH sensor (real or mock).
@@ -19,37 +13,49 @@ class PoolMaster:
 
     def __init__(self):
         self.ph = Probes.factory('ph')
+        self.ph_value = 0.0
         self.orp = Probes.factory('orp')
+        self.orp_value = 0.0
         self.temp = Probes.factory('temp')
+        self.temp_value = 0.0
 
     def read_measures(self):
-        logging.debug("Begin readings...")
-        logging.debug('querying temperature')
+        logging.info("Begin readings...")
+        logging.info('querying temperature')
         self.temp_value = self.temp.get_temp()
-        logging.debug('Temp: %s' % self.temp_value)
-        logging.debug('querying ORP')
+        logging.info('Temp: %s' % self.temp_value)
+        logging.info('querying ORP')
         self.orp_value = self.orp.get_orp()
-        logging.debug('ORP: %s' % self.orp_value)
-        logging.debug('querying pH')
+        logging.info('ORP: %s' % self.orp_value)
+        logging.info('querying pH')
         self.ph_value = self.ph.get_ph()
-        logging.debug('pH: %s' % self.ph_value)
-        logging.debug('END readings.')
+        logging.info('pH: %s' % self.ph_value)
+        logging.info('END readings.')
 
     def send_measures(self):
-        logging.debug('Sending measures..')
+        logging.info('Sending measures..')
         sender = Sender()
+        logging.info('orp...')
         sender.send_redox(self.orp_value)
+        logging.info('sent.')
+        logging.info('temp...')
         sender.send_deg(self.temp_value)
+        logging.info('sent.')
+        logging.info('pH...')
         sender.send_ph(self.ph_value)
+        logging.info('sent.')
         logging.debug('END sending.')
 
 
 
 
 def main():
+    logname = '/home/pi/phweb/box/rest.log'
+    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a', level=logging.DEBUG)
+    logging.info('info test')
     poolMaster = PoolMaster()
     poolMaster.read_measures()
-    #poolMaster.send_measures()
+    poolMaster.send_measures()
 
 if __name__ == '__main__':
     main()
