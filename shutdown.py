@@ -54,6 +54,16 @@ def main():
     # PiJuice shuts down power to Rpi after 20 sec from now
     # This leaves sufficient time to execute the shutdown sequence
     sender = Sender()
+    # checking if an update is required
+    do_update = sender.get_update_settings()
+    if do_update:
+        logging.info('We will make a git pull')
+        subprocess.call(["git pull"])
+        logging.info('Update done')
+    else:
+        logging.info('We do NOT make a git pull')
+
+    # checking if a shutdown should be made
     enable_shutdown = sender.get_shutdown_settings()
     if enable_shutdown:
         logging.info('We will MAKE a shutdown')
