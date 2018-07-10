@@ -15,35 +15,25 @@ class Sender:
         self.user_box = boxsettings.REST_USER
         self.user_box_passwd = boxsettings.REST_PASSWORD
 
-    def __send_data2(self, json, server_url, urlsuffix):
-        url = server_url + urlsuffix
-        r = requests.post(url, json=json, auth=(self.user_box, self.user_box_passwd))
-        if r.status_code != 201:
-            logging.fatal("Cannot reach REST service %s", url)
-        else:
-            logging.info("Data sent to %s of REST service.", urlsuffix)
-        return r
-
-
     def __send_data(self, json, urlsuffix):
         url = self.live_server_url + urlsuffix
+        logging.info('REST url: %s' % url)
+        logging.info('JSON: %s'     % json)
+        logging.info('User: %s'     % self.user_box)
+        logging.info('Passwd: %s'   % self.user_box_passwd)
         r = requests.post(url, json=json, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 201:
             logging.fatal("Cannot reach REST service: %s", url)
         else:
             logging.info("Data sent to %s of REST service.", urlsuffix)
-            logging.info("Error: %s" % r.status_code)
         return r
 
     def send_deg(self, value):
         """A relever: la cle json 'celsius' est identique au champ de la table
         'Deg'. """
-#        value_str = "{0:.3f}".format(value)
-        value_str = str(value)
+        value_str = '%.3f' % value
         json = {'celsius': value_str}
-        url = self.live_server_url + '/deg/'
         return self.__send_data(json, '/deg/')
-
 
 
     def __del_data(self, id, data_type):
@@ -61,18 +51,13 @@ class Sender:
 
 
     def send_ph(self, value):
-        #value_str = "{0:.3f}" .format(value)
-        print(value)
-        value_str = str(value)
+        value_str = '%.3f' % value
         json = {'phval': value_str}
-        url = self.live_server_url + '/ph/'
         return self.__send_data(json, '/ph/')
 
     def send_redox(self, value):
-        #value_str = "{0:.1f}" % value
-        value_str = str(value)
+        value_str = '%.3f' % value
         json = {'redoxval': value_str}
-        url = self.live_server_url + '/redox/'
         return self.__send_data(json, '/redox/')
 
     def __get_last(self, data_type):

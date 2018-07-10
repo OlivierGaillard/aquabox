@@ -102,6 +102,7 @@ class TestApi(unittest.TestCase):
 
 if __name__ == '__main__':
     logname = '/home/pi/phweb/box/rest.log'
+    #logname = 'rest.log'
     logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a', level=logging.DEBUG)
 
     unittest.main()
