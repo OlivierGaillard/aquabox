@@ -45,7 +45,8 @@ class TestApi(unittest.TestCase):
         self.assertEqual(type(results), list)
 
 
-    def btest_sender_deg(self):
+    def test_sender_deg(self):
+        logging.info('testing deg send...')
         sender = Sender()
         for i in range(0,2):
             if i % 2:
@@ -56,6 +57,7 @@ class TestApi(unittest.TestCase):
 
             response = sender.send_deg(self.get_random_degree())
             self.assertEqual(201, response.status_code)
+        logging.info('DONE')
 
 
     def btest_delete_deg(self):
@@ -84,7 +86,6 @@ class TestApi(unittest.TestCase):
         """Get last value saved"""
         sender = Sender()
         response = sender.deg_last()
-        print(response.json())
         self.assertEqual(response.status_code, 200)
 
 
