@@ -86,7 +86,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-    def test_get_shutdown_instruction(self):
+    def btest_get_shutdown_instruction(self):
         sender = Sender()
         enable_shutdown = sender.get_shutdown_settings()
         if enable_shutdown:
@@ -96,7 +96,7 @@ class TestApi(unittest.TestCase):
         self.assertIsNotNone(enable_shutdown, "REST returned None in place of true / false")
 
 
-    def test_get_update_instruction(self):
+    def btest_get_update_instruction(self):
         sender = Sender()
         do_update = sender.get_update_settings()
         if do_update:
@@ -104,6 +104,12 @@ class TestApi(unittest.TestCase):
         else:
             print('No update')
         self.assertIsNotNone(do_update, "REST returned None in place of true / false")
+
+    def test_sender_batterycharge(self):
+        sender = Sender()
+        value = 10
+        response = sender.send_battery_level(value)
+        self.assertEqual(201, response.status_code)
 
 
 

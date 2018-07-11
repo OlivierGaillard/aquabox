@@ -107,6 +107,11 @@ class Sender:
             pass
         return do_update
 
+    def send_battery_level(self, value):
+        value_str = '%s' % value
+        json = {'battery_charge': value_str}
+        return self.__send_data(json, '/battery/')
+
 
 if __name__ == '__main__':
     sender = Sender()
