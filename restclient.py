@@ -2,7 +2,7 @@ import requests
 import boxsettings
 import logging
 
-logname = 'rest.log'
+logname = '/home/pi/phweb/box/rest.log'
 logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
                     filemode='a', level=logging.INFO)
 
@@ -19,6 +19,7 @@ class Sender:
         url = self.live_server_url + urlsuffix
         logging.info('REST url: %s' % url)
         logging.info('JSON: %s'     % json)
+        logging.info('User: %s'     % self.user_box)
         r = requests.post(url, json=json, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 201:
             logging.fatal("Cannot reach REST service: %s", url)
