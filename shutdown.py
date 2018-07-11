@@ -27,6 +27,15 @@ def main():
         logging.fatal("Cannot create pijuice object")
         print("Cannot create pijuice object")
         sys.exit()
+        
+
+    sender = Sender()
+    charge = pj.status.GetChargeLevel()
+    battery_level = charge['data']
+    logging.info('Battery charge in percent: %s' % battery_level)
+    logging.info('Sending info to REST')
+    response = sender.send_battery_level(battery_level)
+    logging.info('Answer: %s' % response.status_code)
 
     a = {}
     a['year'] = 'EVERY_YEAR'
@@ -34,8 +43,8 @@ def main():
     a['day'] = 'EVERY_DAY'
     a['hour'] = 'EVERY_HOUR'
     t = datetime.datetime.utcnow()
-    a['minute'] = (t.minute + DELTA_MIN) % 60
-    #a['minute'] = 0
+    #a['minute'] = (t.minute + DELTA_MIN) % 60
+    a['minute'] = DELTA_MIN
     a['second'] = 0
     status = pj.rtcAlarm.SetAlarm(a)
     if status['error'] != 'NO_ERROR':
@@ -53,7 +62,6 @@ def main():
 
     # PiJuice shuts down power to Rpi after 20 sec from now
     # This leaves sufficient time to execute the shutdown sequence
-    sender = Sender()
     # checking if an update is required
     do_update = sender.get_update_settings()
     if do_update:
