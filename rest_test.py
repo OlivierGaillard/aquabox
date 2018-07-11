@@ -109,6 +109,7 @@ class TestApi(unittest.TestCase):
         sender = Sender()
         value = 10
         response = sender.send_battery_level(value)
+        print response.json()
         self.assertEqual(201, response.status_code)
 
 
