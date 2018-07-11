@@ -43,8 +43,7 @@ def main():
     a['day'] = 'EVERY_DAY'
     a['hour'] = 'EVERY_HOUR'
     t = datetime.datetime.utcnow()
-    #a['minute'] = (t.minute + DELTA_MIN) % 60
-    a['minute'] = DELTA_MIN
+    a['minute'] = (t.minute + DELTA_MIN) % 60
     a['second'] = 0
     status = pj.rtcAlarm.SetAlarm(a)
     if status['error'] != 'NO_ERROR':
