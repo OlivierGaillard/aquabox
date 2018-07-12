@@ -11,8 +11,9 @@ from restclient import Sender
 logname = '/home/pi/phweb/box/rest.log'
 logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a',
                     level=logging.DEBUG)
+DELTA_HOUR = 4
+DELTA_MIN = 0
 
-DELTA_MIN = 120
 def main():
     # Rely on RTC to keep the time
     subprocess.call(["sudo", "hwclock", "--hctosys"])
@@ -41,9 +42,12 @@ def main():
     a['year'] = 'EVERY_YEAR'
     a['month'] = 'EVERY_MONTH'
     a['day'] = 'EVERY_DAY'
-    a['hour'] = 'EVERY_HOUR'
+    #a['hour'] = 'EVERY_HOUR'
+
     t = datetime.datetime.utcnow()
-    a['minute'] = (t.minute + DELTA_MIN) % 60
+    a['hour'] = t.hour + DELTA_HOUR
+    #a['minute'] = (t.minute + DELTA_MIN) % 60
+    a['minute'] = 0
     a['second'] = 0
     status = pj.rtcAlarm.SetAlarm(a)
     if status['error'] != 'NO_ERROR':
