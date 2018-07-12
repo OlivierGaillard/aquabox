@@ -15,6 +15,7 @@ DELTA_HOUR = 4
 DELTA_MIN = 0
 
 def main():
+    time.sleep(40) # to waite for network goes up
     # Rely on RTC to keep the time
     subprocess.call(["sudo", "hwclock", "--hctosys"])
     # This script is started at reboot by cron.
