@@ -221,7 +221,7 @@ class Temp(Ph):
 
 class Orp(Ph):
 
-    def get_random_redox():
+    def get_random_redox(self):
         value = random.randint(100, 600)
         value += random.random()
         return value

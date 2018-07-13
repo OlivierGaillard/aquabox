@@ -54,7 +54,7 @@ def send_battery_charge_level(pool_settings):
 
 
 def main():
-    time.sleep(40)  # to wait for network goes up
+    time.sleep(4)  # to wait for network goes up
     pool_settings = PoolSettings()
     # PoolSettings is able to handle off-line case
 
