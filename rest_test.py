@@ -69,6 +69,12 @@ class TestApi(unittest.TestCase):
         status_code = sender.del_deg(id)
         self.assertEqual(200, status_code)
 
+    def test_sender_deg_minus(self):
+        sender = Sender()
+        response = sender.send_deg(-23.000)
+        self.assertEqual(201, response.status_code)
+
+
     def btest_sender_ph(self):
         logging.info('pH sending test')
         sender = Sender()
@@ -76,11 +82,19 @@ class TestApi(unittest.TestCase):
         logging.info('pH sent. Response: %s' % response.status_code)
         self.assertEqual(201, response.status_code)
 
-    def btest_sender_redox(self):
+    def test_sender_redox(self):
         sender = Sender()
         value = self.get_random_redox()
         response = sender.send_redox(value)
         self.assertEqual(201, response.status_code)
+
+    def btest_sender_redox_1020(self):
+        # TODO: strengthen out of range values
+        sender = Sender()
+        value = 1020.0
+        response = sender.send_redox(value)
+        self.assertEqual(201, response.status_code)
+
 
     def btest_sender_deg_last(self):
         """Get last value saved"""
@@ -116,7 +130,7 @@ class TestApi(unittest.TestCase):
         value = 10
         try:
             response = sender.send_battery_level(value)
-            print response.json()
+            print( response.json())
             self.assertEqual(201, response.status_code)
         except:
             print("No connection possible to send battery_level")

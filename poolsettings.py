@@ -23,7 +23,6 @@ class PoolSettings:
 
     def __init__(self):
         sender = Sender()
-        settings_json = None
         try:
             settings_json = sender.get_pool_settings()
             self.settings = settings_json[0]
@@ -34,9 +33,6 @@ class PoolSettings:
             self.online = True
         except:
             logging.warning('Connection error.')
-
-
-        finally:
             logging.warning("trying to load previous settings from file, as network connection fails.")
             file_name = 'settings.json'
             try:

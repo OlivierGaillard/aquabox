@@ -150,6 +150,13 @@ class Ph(Probes):
         self.connector = I2Connector(address=address)
         self.file_write = self.connector.file_write
         self.file_read  = self.connector.file_read
+        if boxsettings.FAKE_DATA:
+            logging.warning('Sending fake data')
+
+    def get_random_ph(self):
+        value = random.randint(3, 10)
+        value += random.random()
+        return value
 
 
     def write_command(self, cmd):
@@ -186,6 +193,8 @@ class Ph(Probes):
             logging.info("Success: value read in %s times." % nb)
         else:
             logging.warning('Fail: unable to read value. Returning default (0.0) Tried %s times.' % nb)
+        if self.probe_value < 0.0:
+            self.probe_value = 0.0
         return self.probe_value
 
     def get_status(self):
@@ -194,16 +203,32 @@ class Ph(Probes):
         return res
 
     def get_ph(self):
+        if boxsettings.FAKE_DATA:
+            return self.get_random_ph()
         return self.get_value()
 
 class Temp(Ph):
 
+    def fake_temperature(self):
+        deg_value = random.randint(3, 30)
+        deg_value += random.random()
+        return deg_value
+
     def get_temp(self):
+        if boxsettings.FAKE_DATA:
+            return self.fake_temperature()
         return self.get_value()
 
 class Orp(Ph):
 
+    def get_random_redox():
+        value = random.randint(100, 600)
+        value += random.random()
+        return value
+
     def get_orp(self):
+        if boxsettings.FAKE_DATA:
+            return self.get_random_redox()
         return self.get_value()
 
 class MockPh(Ph):

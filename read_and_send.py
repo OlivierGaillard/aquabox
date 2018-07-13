@@ -17,9 +17,10 @@ class PoolMaster:
 
     def __init__(self):
         # TODO: checking i2c shoud not appear here
+        logging.info('waiting for I2C-1 channel...')
         while not os.path.exists('/dev/i2c-1'):
             time.sleep(5.0)
-
+        logging.info('Starting readings')
         self.ph = Probes.factory('ph')
         self.ph_value = 0.001
         self.orp = Probes.factory('orp')
