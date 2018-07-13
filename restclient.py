@@ -3,6 +3,7 @@ import boxsettings
 import logging
 
 logname = '/home/pi/phweb/box/rest.log'
+#logname = 'rest.log'
 logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
                     filemode='a', level=logging.INFO)
 
@@ -77,7 +78,7 @@ class Sender:
     def deg_last(self):
         return self.__get_last('deg')
 
-    def get_piscine_settings(self):
+    def get_pool_settings(self):
         url = self.live_server_url + '/piscine/'
         r = requests.get(url, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 200:
@@ -88,25 +89,25 @@ class Sender:
             values = r.json()[0]
             return values
 
-    def get_shutdown_settings(self):
-        enable_shutdown = None
-        try:
-            values = self.get_piscine_settings() # Json object
-            enable_shutdown = values['enable_shutdown']
-            logging.info("Making a shutdown or not? Answer: %s" % enable_shutdown)
-        except:
-            pass
-        return enable_shutdown
-
-    def get_update_settings(self):
-        do_update = None
-        try:
-            values = self.get_piscine_settings() # Json object
-            do_update = values['do_update']
-            logging.info("Making update or not? Answer: %s" % do_update)
-        except:
-            pass
-        return do_update
+    # def get_shutdown_settings(self):
+    #     enable_shutdown = None
+    #     try:
+    #         values = self.get_pool_settings() # Json object
+    #         enable_shutdown = values['enable_shutdown']
+    #         logging.info("Making a shutdown or not? Answer: %s" % enable_shutdown)
+    #     except:
+    #         pass
+    #     return enable_shutdown
+    #
+    # def get_update_settings(self):
+    #     do_update = None
+    #     try:
+    #         values = self.get_pool_settings() # Json object
+    #         do_update = values['do_update']
+    #         logging.info("Making update or not? Answer: %s" % do_update)
+    #     except:
+    #         pass
+    #     return do_update
 
     def send_battery_level(self, value):
         value_str = '%s' % value

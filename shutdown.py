@@ -7,6 +7,7 @@ import os
 import sys
 import logging
 from restclient import Sender
+from poolsettings import PoolSettings
 
 logname = '/home/pi/phweb/box/rest.log'
 logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a',
@@ -32,6 +33,9 @@ def main():
         
 
     sender = Sender()
+    poolsettings = PoolSettings(sender.get_pool_settings())
+    DELTA_HOUR = poolsettings.time_beetween_readings()
+    logging.info('Time interval between readings = DELTA_HOUR: %s' % DELTA_HOUR)
     charge = pj.status.GetChargeLevel()
     battery_level = charge['data']
     logging.info('Battery charge in percent: %s' % battery_level)
@@ -47,7 +51,6 @@ def main():
 
     t = datetime.datetime.utcnow()
     a['hour'] = t.hour + DELTA_HOUR
-    #a['minute'] = (t.minute + DELTA_MIN) % 60
     a['minute'] = 0
     a['second'] = 0
     status = pj.rtcAlarm.SetAlarm(a)
@@ -67,7 +70,7 @@ def main():
     # PiJuice shuts down power to Rpi after 20 sec from now
     # This leaves sufficient time to execute the shutdown sequence
     # checking if an update is required
-    do_update = sender.get_update_settings()
+    do_update = poolsettings.do_update()
     if do_update:
         logging.info('We will make a git pull')
         subprocess.call(["git", "pull"])
@@ -76,7 +79,7 @@ def main():
         logging.info('We do NOT make a git pull')
 
     # checking if a shutdown should be made
-    enable_shutdown = sender.get_shutdown_settings()
+    enable_shutdown = poolsettings.enable_shutdown()
     if enable_shutdown:
         logging.info('We will MAKE a shutdown')
         print('We will MAKE a shutdown')

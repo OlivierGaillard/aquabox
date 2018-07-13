@@ -4,6 +4,7 @@ import unittest
 import random
 from restclient import Sender
 import boxsettings
+from poolsettings import PoolSettings
 
 class TestApi(unittest.TestCase):
     """This class simulates the work of the sensors box (Raspberry Pi).
@@ -86,9 +87,11 @@ class TestApi(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-    def btest_get_shutdown_instruction(self):
+    def test_get_shutdown_instruction(self):
         sender = Sender()
-        enable_shutdown = sender.get_shutdown_settings()
+        settings = sender.get_pool_settings()
+        settings = PoolSettings(settings)
+        enable_shutdown = settings.enable_shutdown()
         if enable_shutdown:
             print('Shutdown enabled.')
         else:
@@ -96,14 +99,14 @@ class TestApi(unittest.TestCase):
         self.assertIsNotNone(enable_shutdown, "REST returned None in place of true / false")
 
 
-    def btest_get_update_instruction(self):
+    def test_get_update_instruction(self):
         sender = Sender()
-        do_update = sender.get_update_settings()
-        if do_update:
+        settings = PoolSettings(sender.get_pool_settings())
+        if settings.do_update():
             print('Update will be made.')
         else:
             print('No update')
-        self.assertIsNotNone(do_update, "REST returned None in place of true / false")
+        self.assertIsNotNone(settings.do_update(), "REST returned None in place of true / false")
 
     def test_sender_batterycharge(self):
         sender = Sender()
@@ -111,6 +114,11 @@ class TestApi(unittest.TestCase):
         response = sender.send_battery_level(value)
         print response.json()
         self.assertEqual(201, response.status_code)
+
+    def test_sender_get_hour_interval_of_measures(self):
+        sender = Sender()
+        settings = PoolSettings(sender.get_pool_settings())
+        self.assertIsNotNone(settings.time_beetween_readings())
 
 
 
