@@ -61,6 +61,11 @@ def main():
     # If update is required
     do_update(pool_settings)
 
+    # Taking readings
+    pool_master = PoolMaster()
+    pool_master.read_measures()
+    pool_master.send_measures()
+
     send_battery_charge_level(pool_settings)
 
 

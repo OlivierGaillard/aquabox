@@ -17,6 +17,10 @@ class PoolMaster:
     """
 
     def __init__(self):
+        # TODO: checking i2c shoud not appear here
+        while not os.path.exists('/dev/i2c-1'):
+            time.sleep(5.0)
+
         self.ph = Probes.factory('ph')
         self.ph_value = 0.001
         self.orp = Probes.factory('orp')
@@ -25,9 +29,6 @@ class PoolMaster:
         self.temp_value = 0.001
         # This script is started at reboot by cron.
         # Since the start is very early in the boot sequence we wait for the i2c-1 device
-        # TODO: checking i2c shoud not appear here
-        while not os.path.exists('/dev/i2c-1'):
-            time.sleep(5.0)
 
     def read_measures(self):
         logging.info("Begin readings...")
