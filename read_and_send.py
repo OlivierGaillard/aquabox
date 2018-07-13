@@ -2,7 +2,6 @@
 import logging
 from restclient import Sender
 from probes import Probes
-import shutdown
 import time
 import os
 
@@ -27,6 +26,7 @@ class PoolMaster:
         self.orp_value = 0.1
         self.temp = Probes.factory('temp')
         self.temp_value = 0.001
+        logging.info('PoolMaster is initialized')
         # This script is started at reboot by cron.
         # Since the start is very early in the boot sequence we wait for the i2c-1 device
 

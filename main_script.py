@@ -62,6 +62,7 @@ def main():
     do_update(pool_settings)
 
     # Taking readings
+    logging.info('Starting poolmaster to begin readings')
     pool_master = PoolMaster()
     pool_master.read_measures()
     pool_master.send_measures()
