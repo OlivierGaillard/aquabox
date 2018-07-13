@@ -1,12 +1,15 @@
 #!/usr/bin/python
 import logging
 from restclient import Sender
-import boxsettings
-import sleep
-import random
 from probes import Probes
 import shutdown
 import time
+import os
+
+logname = '/home/pi/phweb/box/rest.log'
+logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a',
+                    level=logging.DEBUG)
+
 
 class PoolMaster:
     """
@@ -20,6 +23,11 @@ class PoolMaster:
         self.orp_value = 0.1
         self.temp = Probes.factory('temp')
         self.temp_value = 0.001
+        # This script is started at reboot by cron.
+        # Since the start is very early in the boot sequence we wait for the i2c-1 device
+        # TODO: checking i2c shoud not appear here
+        while not os.path.exists('/dev/i2c-1'):
+            time.sleep(5.0)
 
     def read_measures(self):
         logging.info("Begin readings...")
@@ -44,21 +52,3 @@ class PoolMaster:
         logging.info('pH...')
         sender.send_ph(float(self.ph_value))
         logging.debug('END sending.')
-
-
-
-
-def main():
-    logname = '/home/pi/phweb/box/rest.log'
-    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a', level=logging.DEBUG)
-    logging.info('Waiting 30 sec to allow network to be up.')
-    time.sleep(30)
-    logging.info('PoolMaster starts the job')
-    poolMaster = PoolMaster()
-    poolMaster.read_measures()
-    poolMaster.send_measures()
-    logging.info('End of JOG')
-    shutdown.main()
-
-if __name__ == '__main__':
-    main()

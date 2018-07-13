@@ -5,6 +5,8 @@ import random
 from restclient import Sender
 import boxsettings
 from poolsettings import PoolSettings
+from urllib3.exceptions import NewConnectionError
+
 
 class TestApi(unittest.TestCase):
     """This class simulates the work of the sensors box (Raspberry Pi).
@@ -88,9 +90,7 @@ class TestApi(unittest.TestCase):
 
 
     def test_get_shutdown_instruction(self):
-        sender = Sender()
-        settings = sender.get_pool_settings()
-        settings = PoolSettings(settings)
+        settings = PoolSettings()
         enable_shutdown = settings.enable_shutdown()
         if enable_shutdown:
             print('Shutdown enabled.')
@@ -99,26 +99,41 @@ class TestApi(unittest.TestCase):
         self.assertIsNotNone(enable_shutdown, "REST returned None in place of true / false")
 
 
+
     def test_get_update_instruction(self):
-        sender = Sender()
-        settings = PoolSettings(sender.get_pool_settings())
+        settings = PoolSettings()
+        print ('Online? %s ' % settings.is_online())
         if settings.do_update():
             print('Update will be made.')
         else:
             print('No update')
         self.assertIsNotNone(settings.do_update(), "REST returned None in place of true / false")
 
+
+
     def test_sender_batterycharge(self):
         sender = Sender()
         value = 10
-        response = sender.send_battery_level(value)
-        print response.json()
-        self.assertEqual(201, response.status_code)
+        try:
+            response = sender.send_battery_level(value)
+            print response.json()
+            self.assertEqual(201, response.status_code)
+        except:
+            print("No connection possible to send battery_level")
+
 
     def test_sender_get_hour_interval_of_measures(self):
-        sender = Sender()
-        settings = PoolSettings(sender.get_pool_settings())
+        settings = PoolSettings()
         self.assertIsNotNone(settings.time_beetween_readings())
+        print('Time between readings: %s hour(s).' % settings.time_beetween_readings())
+
+    def test_sender_enable_reading(self):
+        settings = PoolSettings()
+        self.assertIsNotNone(settings.enable_reading())
+        print('Enable reading? %s' % settings.enable_reading())
+
+
+
 
 
 

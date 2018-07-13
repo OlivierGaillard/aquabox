@@ -2,8 +2,8 @@ import requests
 import boxsettings
 import logging
 
-logname = '/home/pi/phweb/box/rest.log'
-#logname = 'rest.log'
+#logname = '/home/pi/phweb/box/rest.log'
+logname = 'rest.log'
 logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
                     filemode='a', level=logging.INFO)
 
@@ -86,7 +86,7 @@ class Sender:
             logging.info("Error: %s" % r.status_code)
             raise Exception("Connection to REST service failed.")
         else:
-            values = r.json()[0]
+            values = r.json()
             return values
 
     # def get_shutdown_settings(self):
