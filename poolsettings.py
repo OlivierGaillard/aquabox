@@ -53,8 +53,51 @@ class PoolSettings:
     def do_update(self):
         return self.settings['do_update']
 
-    def time_beetween_readings(self):
-        return self.settings['time_beetween_readings']
-
     def enable_reading(self):
         return self.settings['enable_reading']
+
+    def hours_of_readings(self):
+        return self.settings['hours_of_readings']
+
+
+class HoursUtils:
+    "Utility to get starting hour and next hour of readings based on the current UTC time."
+
+    UTC_DELTA = -2
+    hours = []
+    next_hour = 0
+    current_hour = 0
+
+    def __init__(self, hours_enum, current_hour):
+        """
+        :param hours_enum: 8,12,18
+        :return: [8,12,18]
+        """
+        self.hours = [int(h)+self.UTC_DELTA for h in hours_enum.split(',')]
+        self.current_hour = current_hour
+        self.__set_next_hour()
+
+    def __set_next_hour(self):
+        next_h = 0
+        for n in self.hours:
+            if self.current_hour < n:
+                next_h = n
+                break
+        if next_h == 0:
+            next_h = self.hours[0]
+        self.next_hour = next_h
+
+
+    def next_reading_hour(self):
+        """
+
+        :param h: current hour
+        :return: next reading hour
+        """
+        return  self.next_hour
+
+    def next_reading_hour_local(self):
+        return self.next_hour - self.UTC_DELTA
+
+
+
