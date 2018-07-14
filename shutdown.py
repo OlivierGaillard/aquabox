@@ -27,7 +27,7 @@ class WakeUp:
                 logging.info('No shutdown now.')
 
         t = datetime.datetime.utcnow()
-        self.hoursUtil = HoursUtils(pool_settings.hours_of_readings(), t.hour)
+        self.hoursUtil = HoursUtils(self.pool_settings.hours_of_readings(), t.hour)
 
 
 

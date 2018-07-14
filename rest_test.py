@@ -69,7 +69,7 @@ class TestApi(unittest.TestCase):
         status_code = sender.del_deg(id)
         self.assertEqual(200, status_code)
 
-    def test_sender_deg_minus(self):
+    def btest_sender_deg_minus(self):
         sender = Sender()
         response = sender.send_deg(-23.000)
         self.assertEqual(201, response.status_code)
@@ -82,7 +82,7 @@ class TestApi(unittest.TestCase):
         logging.info('pH sent. Response: %s' % response.status_code)
         self.assertEqual(201, response.status_code)
 
-    def test_sender_redox(self):
+    def btest_sender_redox(self):
         sender = Sender()
         value = self.get_random_redox()
         response = sender.send_redox(value)
@@ -125,7 +125,7 @@ class TestApi(unittest.TestCase):
 
 
 
-    def test_sender_batterycharge(self):
+    def btest_sender_batterycharge(self):
         sender = Sender()
         value = 10
         try:
@@ -136,7 +136,7 @@ class TestApi(unittest.TestCase):
             print("No connection possible to send battery_level")
 
 
-    def test_sender_get_hour_interval_of_measures(self):
+    def btest_sender_get_hour_interval_of_measures(self):
         settings = PoolSettings()
         self.assertIsNotNone(settings.time_beetween_readings())
         print('Time between readings: %s hour(s).' % settings.time_beetween_readings())

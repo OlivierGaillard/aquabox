@@ -47,18 +47,16 @@ def send_battery_charge_level(pool_settings):
 
 
 def main():
-    time.sleep(4)  # to wait for network goes up
+    time.sleep(10)  # to wait for network goes up
     pool_settings = PoolSettings()
     # PoolSettings is able to handle off-line case
+    # and will decide if update and readings will be made.
 
     # If update is required
     do_update(pool_settings)
 
-    # Taking readings
-    logging.info('Starting poolmaster to begin readings')
-    pool_master = PoolMaster()
-    pool_master.read_measures()
-    pool_master.send_measures()
+    # Taking readings eventually
+    take_measures(pool_settings)
 
     send_battery_charge_level(pool_settings)
 

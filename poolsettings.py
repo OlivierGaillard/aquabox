@@ -27,22 +27,22 @@ class PoolSettings:
         try:
             settings_json = sender.get_pool_settings()
             self.settings = settings_json[0]
-            self.logging.info('Saving settings to local JSON file %s ' % self.file_name)
+            logging.info('Saving settings to local JSON file %s ' % self.file_name)
             with open(self.file_name, 'w') as outfile:
                 json.dump(self.settings, outfile)
-            self.logging.info("Settings written to file.")
+            logging.info("Settings written to file.")
             self.online = True
         except:
-            self.logging.warning('Connection error.')
-            self.logging.warning("trying to load previous settings from file, as network connection fails.")
+            logging.warning('Connection error.')
+            logging.warning("trying to load previous settings from file, as network connection fails.")
             file_name = 'settings.json'
             try:
                 with open(file_name) as infile:
                     self.settings = json.load(infile)
-                self.logging.info("Success reading from file")
+                logging.info("Success reading from file")
             except:
                 # falling back to default
-                self.logging.warning("No file found. Using default values")
+                logging.warning("No file found. Using default values")
 
     def is_online(self):
         return self.online
