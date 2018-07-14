@@ -55,7 +55,6 @@ class WakeUp:
         self.hoursUtil = HoursUtils(pool_settings.hours_of_readings(), t.hour)
         self.next_hour = self.hoursUtil.next_reading_hour()
         logging.info('Next reading hour in local time: %s' % self.hoursUtil.next_reading_hour_local())
-        logging.info('Time interval between readings = DELTA_HOUR: %s' % self.delta_hours)
 
 
         a['hour'] = self.hoursUtil.next_reading_hour()
