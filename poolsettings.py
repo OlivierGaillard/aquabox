@@ -2,9 +2,6 @@ import json
 import logging
 from restclient import Sender
 
-logname = '/home/pi/phweb/box/rest.log'
-logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
-                    filemode='a', level=logging.INFO)
 
 class PoolSettings:
     """Encapsulates pool settings like:
@@ -12,6 +9,10 @@ class PoolSettings:
     - next wakeup
     - do update
     """
+
+    logname = '/home/pi/phweb/box/rest.log'
+    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
+                        filemode='a', level=logging.INFO)
 
     # In case of no connection we load the previously saved JSON-settings
     # If no JSON file can be found we define fall-back values here
@@ -26,22 +27,22 @@ class PoolSettings:
         try:
             settings_json = sender.get_pool_settings()
             self.settings = settings_json[0]
-            logging.info('Saving settings to local JSON file %s ' % self.file_name)
+            self.logging.info('Saving settings to local JSON file %s ' % self.file_name)
             with open(self.file_name, 'w') as outfile:
                 json.dump(self.settings, outfile)
-            logging.info("Settings written to file.")
+            self.logging.info("Settings written to file.")
             self.online = True
         except:
-            logging.warning('Connection error.')
-            logging.warning("trying to load previous settings from file, as network connection fails.")
+            self.logging.warning('Connection error.')
+            self.logging.warning("trying to load previous settings from file, as network connection fails.")
             file_name = 'settings.json'
             try:
                 with open(file_name) as infile:
                     self.settings = json.load(infile)
-                logging.info("Success reading from file")
+                self.logging.info("Success reading from file")
             except:
                 # falling back to default
-                logging.warning("No file found. Using default values")
+                self.logging.warning("No file found. Using default values")
 
     def is_online(self):
         return self.online

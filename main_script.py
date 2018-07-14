@@ -1,8 +1,6 @@
 from __future__ import print_function
 import pijuice
 import subprocess
-import os
-import sys
 import logging
 from restclient import Sender
 from shutdown import WakeUp
@@ -10,11 +8,6 @@ import time
 from poolsettings import PoolSettings
 from read_and_send import PoolMaster
 
-
-
-logname = '/home/pi/phweb/box/rest.log'
-logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a',
-                    level=logging.DEBUG)
 
 def do_update(pool_settings):
     # Checking if an update is required
@@ -54,7 +47,7 @@ def send_battery_charge_level(pool_settings):
 
 
 def main():
-    time.sleep(40)  # to wait for network goes up
+    time.sleep(4)  # to wait for network goes up
     pool_settings = PoolSettings()
     # PoolSettings is able to handle off-line case
 
@@ -77,6 +70,10 @@ def main():
 
 
 if __name__ == '__main__':
+    logname = '/home/pi/phweb/box/rest.log'
+    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a',
+                        level=logging.DEBUG)
+
     main()
 
 

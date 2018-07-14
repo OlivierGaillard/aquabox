@@ -16,15 +16,19 @@ class WakeUp:
     pj = None
 
     def __init__(self, poolSettings):
-        self.poolsettings = poolSettings
+        self.pool_settings = poolSettings
 
         if not self.is_pijuice_available():
             logging.fatal('As pijuice fails we eventually shutdown now.')
-            if self.poolsettings.enable_shutdown():
+            if self.pool_settings.enable_shutdown():
                 logging.info('Shutdown')
                 self.shut_down()
             else:
                 logging.info('No shutdown now.')
+
+        t = datetime.datetime.utcnow()
+        self.hoursUtil = HoursUtils(pool_settings.hours_of_readings(), t.hour)
+
 
 
 
@@ -50,9 +54,9 @@ class WakeUp:
         a['day'] = 'EVERY_DAY'
         # a['hour'] = 'EVERY_HOUR'
 
-        t = datetime.datetime.utcnow()
+
         logging.info('Retrieving hours of readings')
-        self.hoursUtil = HoursUtils(pool_settings.hours_of_readings(), t.hour)
+
         self.next_hour = self.hoursUtil.next_reading_hour()
         logging.info('Next reading hour in local time: %s' % self.hoursUtil.next_reading_hour_local())
 
@@ -80,7 +84,7 @@ class WakeUp:
         # This leaves sufficient time to execute the shutdown sequence
         # checking if an update is required
         # checking if a shutdown should be made
-        if self.poolsettings.enable_shutdown():
+        if self.pool_settings.enable_shutdown():
             logging.info('We will MAKE a shutdown')
             print('We will MAKE a shutdown')
             self.pj.power.SetPowerOff(20)
