@@ -32,7 +32,7 @@ class TestSensors(unittest.TestCase):
         orp = Probes.factory('orp')
         print(orp.get_orp())
 
-    def btest_translate_answer(self):
+    def test_translate_answer(self):
         probectrl = ProbesController()
         answer = probectrl.translate_answer('Command succeeded ?L,0')
         self.assertEqual(answer, 'Off')
@@ -40,7 +40,7 @@ class TestSensors(unittest.TestCase):
     def test_temperature(self):
         t = Probes.factory('temp')
         print ('querying temperature')
-        temp = t.get_temp()
+        print (t.get_temp())
 
 if __name__ == '__main__':
     unittest.main()
