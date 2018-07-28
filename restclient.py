@@ -2,12 +2,6 @@ import requests
 import boxsettings
 import logging
 
-#logname = '/home/pi/phweb/box/rest.log'
-logname = 'rest.log'
-logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
-                    filemode='a', level=logging.INFO)
-
-
 class Sender:
     """The class responsible for sending data to the REST service."""
 

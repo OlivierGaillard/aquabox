@@ -47,7 +47,7 @@ def send_battery_charge_level(pool_settings):
 
 
 def main():
-    time.sleep(10)  # to wait for network goes up
+    time.sleep(30)  # to wait for network goes up
     pool_settings = PoolSettings()
     # PoolSettings is able to handle off-line case
     # and will decide if update and readings will be made.
@@ -66,10 +66,8 @@ def main():
     wake_up.prepare_wakeup()
     wake_up.do_shutdown()
 
-
 if __name__ == '__main__':
-    #    logname = '/home/pi/phweb/box/rest.log'
-    logname = __name__  # '/home/pi/phweb/box/rest.log'
+    logname = '/home/pi/phweb/box/rest.log'
     logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='w',
                         level=logging.DEBUG)
     main()
