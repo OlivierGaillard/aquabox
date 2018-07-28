@@ -47,7 +47,7 @@ class WakeUp:
 
     def prepare_wakeup(self):
             # Rely on RTC to keep the time
-        subprocess.call(["sudo", "hwclock", "--hctosys"])
+        #subprocess.call(["sudo", "hwclock", "--hctosys"])
         a = {}
         a['year'] = 'EVERY_YEAR'
         a['month'] = 'EVERY_MONTH'
