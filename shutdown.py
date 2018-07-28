@@ -7,9 +7,7 @@ import sys
 import logging
 from poolsettings import PoolSettings, HoursUtils
 
-logname = '/home/pi/phweb/box/rest.log'
-logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a',
-                    level=logging.DEBUG)
+
 
 class WakeUp:
 

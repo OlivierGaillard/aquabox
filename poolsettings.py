@@ -10,9 +10,6 @@ class PoolSettings:
     - do update
     """
 
-    logname = '/home/pi/phweb/box/rest.log'
-    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname,
-                        filemode='a', level=logging.INFO)
 
     # In case of no connection we load the previously saved JSON-settings
     # If no JSON file can be found we define fall-back values here

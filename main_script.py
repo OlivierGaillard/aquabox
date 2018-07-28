@@ -68,10 +68,12 @@ def main():
 
 
 if __name__ == '__main__':
-    logname = '/home/pi/phweb/box/rest.log'
-    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a',
+    #    logname = '/home/pi/phweb/box/rest.log'
+    logname = __name__  # '/home/pi/phweb/box/rest.log'
+    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='w',
                         level=logging.DEBUG)
-
     main()
+
+
 
 
