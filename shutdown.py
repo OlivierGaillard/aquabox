@@ -10,6 +10,8 @@ from log import LogUtil
 import boxsettings
 from restclient import Sender
 
+logger = logging.getLogger('shutdown.py')
+#logger.setLevel(log_level)
 
 class PijuiceException(Exception):
     message = ""
@@ -17,8 +19,8 @@ class PijuiceException(Exception):
     def __init__(self, msg):
         self.message = msg
 
-logger = logging.getLogger(__name__)
-#logger.setLevel(log_level)
+
+
 
 
 class WakeUp:
@@ -27,8 +29,6 @@ class WakeUp:
 
     def __init__(self, poolSettings):
         self.pool_settings = poolSettings
-
-
 
         if not self.is_pijuice_available():
             logger.fatal('As pijuice fails we eventually shutdown now.')
