@@ -12,9 +12,9 @@ class Sender:
 
     def __send_data(self, json, urlsuffix):
         url = self.live_server_url + urlsuffix
-        logging.info('REST url: %s' % url)
-        logging.info('JSON: %s'     % json)
-        logging.info('User: %s'     % self.user_box)
+        logging.debug('REST url: %s' % url)
+        logging.debug('JSON: %s'     % json)
+        logging.debug('User: %s'     % self.user_box)
         r = requests.post(url, json=json, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 201:
             logging.fatal("Cannot reach REST service: %s", url)
@@ -107,6 +107,10 @@ class Sender:
         value_str = '%s' % value
         json = {'battery_charge': value_str}
         return self.__send_data(json, '/battery/')
+
+    def send_log(self, log_text):
+        json = {'log': log_text}
+        return self.__send_data(json, '/log/')
 
 
 if __name__ == '__main__':

@@ -7,6 +7,8 @@ from shutdown import WakeUp
 import time
 from poolsettings import PoolSettings
 from read_and_send import PoolMaster
+import boxsettings
+from log import LogUtil
 
 
 def do_update(pool_settings):
@@ -43,34 +45,48 @@ def send_battery_charge_level(pool_settings):
             logging.info(('Off-line. Battery level not sent'))
     except:
         logging.fatal("Cannot create pijuice object")
-        print("Cannot create pijuice object")
 
 
-def main():
+
+def main(pool_settings):
     time.sleep(30)  # to wait for network goes up
+    try:
+
+        # If update is required
+        do_update(pool_settings)
+
+        # Taking readings eventually
+        take_measures(pool_settings)
+
+        send_battery_charge_level(pool_settings)
+
+
+        # Schedule next wakeup and doing shutdown
+        wake_up = WakeUp(pool_settings)
+        wake_up.prepare_wakeup()
+        wake_up.do_shutdown()
+    except:
+        time.sleep(10)
+        logutil = LogUtil()
+        logutil.read_log(boxsettings.LOG_FILE)
+        try:
+            sender = Sender()
+            sender.send_log(logutil.log_text)
+        except:
+            msg = "problem occured when attempting to send the log."
+            logging.fatal(msg)
+
+
+if __name__ == '__main__':
+    logname = boxsettings.LOG_FILE
     pool_settings = PoolSettings()
     # PoolSettings is able to handle off-line case
     # and will decide if update and readings will be made.
-
-    # If update is required
-    do_update(pool_settings)
-
-    # Taking readings eventually
-    take_measures(pool_settings)
-
-    send_battery_charge_level(pool_settings)
-
-
-    # Schedule next wakeup and doing shutdown
-    wake_up = WakeUp(pool_settings)
-    wake_up.prepare_wakeup()
-    wake_up.do_shutdown()
-
-if __name__ == '__main__':
-    logname = '/home/pi/phweb/box/rest.log'
+    log_util = LogUtil()
+    log_level = log_util.get_log_level(pool_settings.log_level())
     logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='w',
-                        level=logging.DEBUG)
-    main()
+                        level=log_level)
+    main(pool_settings)
 
 
 

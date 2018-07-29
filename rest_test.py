@@ -5,7 +5,7 @@ import random
 from restclient import Sender
 import boxsettings
 from poolsettings import PoolSettings
-from urllib3.exceptions import NewConnectionError
+from log import LogUtil
 
 
 class TestApi(unittest.TestCase):
@@ -146,14 +146,54 @@ class TestApi(unittest.TestCase):
         self.assertIsNotNone(settings.enable_reading())
         print('Enable reading? %s' % settings.enable_reading())
 
+    def test_sender_get_loglevel(self):
+        settings = PoolSettings()
+        self.assertIsNotNone(settings.log_level())
+        print('Log level? %s' % settings.log_level())
+
+    def test_logutil_loglevel(self):
+        logutil = LogUtil()
+        self.assertEqual(logging.DEBUG, logutil.get_log_level('DEBUG'))
 
 
+
+    def btest_sender_send_log(self):
+        sender = Sender()
+        log_text = """INFO	: 2018-07-13 16:28:04,039 : Saving settings to local JSON file settings.json 
+INFO	: 2018-07-13 16:28:04,046 : Settings written to file.
+INFO	: 2018-07-13 16:28:04,143 : Saving settings to local JSON file settings.json 
+INFO	: 2018-07-13 16:28:04,143 : Settings written to file.
+INFO	: 2018-07-13 16:28:04,144 : REST url: http://aquawatch.ch/battery/
+INFO	: 2018-07-13 16:28:04,144 : JSON: {'battery_charge': '10'}
+INFO	: 2018-07-13 16:28:04,144 : User: raspi
+INFO	: 2018-07-13 16:28:04,248 : Data sent to /battery/ of REST service.
+        """
+        try:
+            response = sender.send_log(log_text)
+            print(response.json())
+            self.assertEqual(201, response.status_code)
+        except:
+            msg = "problem occured when attempting to send the log"
+            self.assertFalse(True, msg)
+
+
+    def btest_sender_send_log_with_LogUtil(self):
+        sender = Sender()
+        logutil = LogUtil()
+        logutil.read_log(boxsettings.LOG_FILE)
+        try:
+            response = sender.send_log(logutil.log_text)
+            print(response.json())
+            self.assertEqual(201, response.status_code)
+        except:
+            msg = "problem occured when attempting to send the log"
+            self.assertFalse(True, msg)
 
 
 
 if __name__ == '__main__':
     #logname = '/home/pi/phweb/box/rest.log'
-    logname = 'rest.log'
+    logname = boxsettings.LOG_FILE
     logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='a', level=logging.DEBUG)
 
     unittest.main()

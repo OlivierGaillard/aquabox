@@ -6,6 +6,13 @@ import datetime
 import sys
 import logging
 from poolsettings import PoolSettings, HoursUtils
+import boxsettings
+
+class PijuiceException(Exception):
+    message = ""
+
+    def __init__(self, msg):
+        self.message = msg
 
 
 
@@ -36,8 +43,7 @@ class WakeUp:
             return True
         except:
             logging.fatal("Cannot create pijuice object")
-            print("Cannot create pijuice object")
-            return False
+            raise PijuiceException(msg="Cannot create pijuice object")
 
     def shut_down(self):
         subprocess.call(["sudo", "poweroff"])
@@ -64,9 +70,8 @@ class WakeUp:
         a['second'] = 0
         status = self.pj.rtcAlarm.SetAlarm(a)
         if status['error'] != 'NO_ERROR':
-            print('Cannot set alarm\n')
             logging.warning('Cannot set alarm')
-            sys.exit()
+            raise PijuiceException(msg='prepare_wakeup: I cannot set alarm')
         else:
             logging.info('Alarm set for %s UTC' % str(self.pj.rtcAlarm.GetAlarm()))
             print('Alarm set for %s UTC' % str(self.pj.rtcAlarm.GetAlarm()))
@@ -85,6 +90,19 @@ class WakeUp:
         if self.pool_settings.enable_shutdown():
             logging.info('We will MAKE a shutdown')
             print('We will MAKE a shutdown')
+            print('We send the logfile just before')
+            logging.info('Sending log file just before')
+            logutil = LogUtil()
+            logutil.read_log(boxsettings.LOG_FILE)
+            try:
+                sender = Sender()
+                logging.info('Bye bye.')
+                time.sleep(10)
+                sender.send_log(logutil.log_text)
+            except:
+                msg = "problem occured when attempting to send the log."
+                logging.fatal(msg)
+
             self.pj.power.SetPowerOff(20)
             self.shut_down()
         else:

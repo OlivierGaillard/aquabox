@@ -14,7 +14,8 @@ class PoolSettings:
     # In case of no connection we load the previously saved JSON-settings
     # If no JSON file can be found we define fall-back values here
     settings = {'enable_reading' : False, 'do_update' : False,
-                'time_between_readings' : 24, 'enable_shutdown' : False}
+                'time_between_readings' : 24, 'enable_shutdown' : False,
+                'log_level' : logging.DEBUG}
 
     file_name = "settings.json"
     online = False
@@ -24,7 +25,7 @@ class PoolSettings:
         try:
             settings_json = sender.get_pool_settings()
             self.settings = settings_json[0]
-            logging.info('Saving settings to local JSON file %s ' % self.file_name)
+            logging.info('We are online.\n Saving settings to local JSON file %s ' % self.file_name)
             with open(self.file_name, 'w') as outfile:
                 json.dump(self.settings, outfile)
             logging.info("Settings written to file.")
@@ -56,6 +57,9 @@ class PoolSettings:
 
     def hours_of_readings(self):
         return self.settings['hours_of_readings']
+
+    def log_level(self):
+        return self.settings['log_level']
 
 
 class HoursUtils:
