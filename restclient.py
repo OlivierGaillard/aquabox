@@ -2,6 +2,7 @@ import requests
 import boxsettings
 import logging
 
+
 class Sender:
     """The class responsible for sending data to the REST service."""
 
@@ -9,17 +10,19 @@ class Sender:
         self.live_server_url = boxsettings.REST_SERVICE
         self.user_box = boxsettings.REST_USER
         self.user_box_passwd = boxsettings.REST_PASSWORD
+        self.logger = logging.getLogger(__name__)
+
 
     def __send_data(self, json, urlsuffix):
         url = self.live_server_url + urlsuffix
-        logging.debug('REST url: %s' % url)
-        logging.debug('JSON: %s'     % json)
-        logging.debug('User: %s'     % self.user_box)
+        self.logger.debug('REST url: %s' % url)
+        self.logger.debug('JSON: %s'     % json)
+        self.logger.debug('User: %s'     % self.user_box)
         r = requests.post(url, json=json, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 201:
-            logging.fatal("Cannot reach REST service: %s", url)
+            self.logger.fatal("Cannot reach REST service: %s", url)
         else:
-            logging.info("Data sent to %s of REST service.", urlsuffix)
+            self.logger.info("Data sent to %s of REST service.", urlsuffix)
         return r
 
     def send_deg(self, value):
@@ -34,10 +37,10 @@ class Sender:
         url = self.live_server_url + '/%s/%s/delete/' % (data_type, id)
         r = requests.post(url, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 201:
-            logging.fatal("Cannot reach REST service.")
+            self.logger.fatal("Cannot reach REST service.")
             return r.status_code
         else:
-            logging.info("Deleted data %s with ID %s" (data_type, id))
+            self.logger.info("Deleted data %s with ID %s" % (data_type, id))
             return r.status_code
 
     def del_deg(self, id):
@@ -60,12 +63,12 @@ class Sender:
         url = self.live_server_url + url_suffix
         r = requests.get(url, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 200:
-            logging.fatal("Cannot reach REST service.")
-            logging.info("Error: %s" % r.status_code)
+            self.logger.fatal("Cannot reach REST service.")
+            self.logger.info("Error: %s" % r.status_code)
             return r
         else:
             value = r.json()[measures[data_type]]
-            logging.info("Last value stored: %s" % value)
+            self.logger.info("Last value stored: %s" % value)
             return r
 
 
@@ -76,8 +79,8 @@ class Sender:
         url = self.live_server_url + '/piscine/'
         r = requests.get(url, auth=(self.user_box, self.user_box_passwd))
         if r.status_code != 200:
-            logging.fatal("Cannot reach REST service.")
-            logging.info("Error: %s" % r.status_code)
+            self.logger.fatal("Cannot reach REST service.")
+            self.logger.info("Error: %s" % r.status_code)
             raise Exception("Connection to REST service failed.")
         else:
             values = r.json()
@@ -88,7 +91,7 @@ class Sender:
     #     try:
     #         values = self.get_pool_settings() # Json object
     #         enable_shutdown = values['enable_shutdown']
-    #         logging.info("Making a shutdown or not? Answer: %s" % enable_shutdown)
+    #         self.logger.info("Making a shutdown or not? Answer: %s" % enable_shutdown)
     #     except:
     #         pass
     #     return enable_shutdown
@@ -98,7 +101,7 @@ class Sender:
     #     try:
     #         values = self.get_pool_settings() # Json object
     #         do_update = values['do_update']
-    #         logging.info("Making update or not? Answer: %s" % do_update)
+    #         self.logger.info("Making update or not? Answer: %s" % do_update)
     #     except:
     #         pass
     #     return do_update

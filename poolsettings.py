@@ -2,7 +2,6 @@ import json
 import logging
 from restclient import Sender
 
-
 class PoolSettings:
     """Encapsulates pool settings like:
     - shutdown enable
@@ -25,7 +24,7 @@ class PoolSettings:
         try:
             settings_json = sender.get_pool_settings()
             self.settings = settings_json[0]
-            logging.info('We are online.\n Saving settings to local JSON file %s ' % self.file_name)
+            logging.info('We are online. Saving settings to local JSON file %s ' % self.file_name)
             with open(self.file_name, 'w') as outfile:
                 json.dump(self.settings, outfile)
             logging.info("Settings written to file.")

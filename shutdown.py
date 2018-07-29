@@ -6,7 +6,10 @@ import datetime
 import sys
 import logging
 from poolsettings import PoolSettings, HoursUtils
+#from log import LogUtil
 import boxsettings
+
+
 
 class PijuiceException(Exception):
     message = ""
@@ -14,6 +17,8 @@ class PijuiceException(Exception):
     def __init__(self, msg):
         self.message = msg
 
+logger = logging.getLogger(__name__)
+#logger.setLevel(log_level)
 
 
 class WakeUp:
@@ -23,13 +28,15 @@ class WakeUp:
     def __init__(self, poolSettings):
         self.pool_settings = poolSettings
 
+
+
         if not self.is_pijuice_available():
-            logging.fatal('As pijuice fails we eventually shutdown now.')
+            logger.fatal('As pijuice fails we eventually shutdown now.')
             if self.pool_settings.enable_shutdown():
-                logging.info('Shutdown')
+                logger.info('Shutdown')
                 self.shut_down()
             else:
-                logging.info('No shutdown now.')
+                logger.info('No shutdown now.')
 
         t = datetime.datetime.utcnow()
         self.hoursUtil = HoursUtils(self.pool_settings.hours_of_readings(), t.hour)
@@ -42,7 +49,7 @@ class WakeUp:
             self.pj = pijuice.PiJuice(1, 0x14)
             return True
         except:
-            logging.fatal("Cannot create pijuice object")
+            logger.fatal("Cannot create pijuice object")
             raise PijuiceException(msg="Cannot create pijuice object")
 
     def shut_down(self):
@@ -59,10 +66,10 @@ class WakeUp:
         # a['hour'] = 'EVERY_HOUR'
 
 
-        logging.info('Retrieving hours of readings')
+        logger.info('Retrieving hours of readings')
 
         self.next_hour = self.hoursUtil.next_reading_hour()
-        logging.info('Next reading hour in local time: %s' % self.hoursUtil.next_reading_hour_local())
+        logger.info('Next reading hour in local time: %s' % self.hoursUtil.next_reading_hour_local())
 
 
         a['hour'] = self.hoursUtil.next_reading_hour()
@@ -70,10 +77,10 @@ class WakeUp:
         a['second'] = 0
         status = self.pj.rtcAlarm.SetAlarm(a)
         if status['error'] != 'NO_ERROR':
-            logging.warning('Cannot set alarm')
+            logger.warning('Cannot set alarm')
             raise PijuiceException(msg='prepare_wakeup: I cannot set alarm')
         else:
-            logging.info('Alarm set for %s UTC' % str(self.pj.rtcAlarm.GetAlarm()))
+            logger.info('Alarm set for %s UTC' % str(self.pj.rtcAlarm.GetAlarm()))
             print('Alarm set for %s UTC' % str(self.pj.rtcAlarm.GetAlarm()))
 
         # Enable wakeup, otherwise power to the RPi will not be
@@ -88,26 +95,26 @@ class WakeUp:
         # checking if an update is required
         # checking if a shutdown should be made
         if self.pool_settings.enable_shutdown():
-            logging.info('We will MAKE a shutdown')
+            logger.info('We will MAKE a shutdown')
             print('We will MAKE a shutdown')
             print('We send the logfile just before')
-            logging.info('Sending log file just before')
+            logger.info('Sending log file just before')
             logutil = LogUtil()
             logutil.read_log(boxsettings.LOG_FILE)
             try:
                 sender = Sender()
-                logging.info('Bye bye.')
+                logger.info('Bye bye.')
                 time.sleep(10)
                 sender.send_log(logutil.log_text)
             except:
                 msg = "problem occured when attempting to send the log."
-                logging.fatal(msg)
+                logger.fatal(msg)
 
             self.pj.power.SetPowerOff(20)
             self.shut_down()
         else:
             print('We do NOT make a shutdown')
-            logging.info('We do NOT make a shutdown')
+            logger.info('We do NOT make a shutdown')
 
 
 if __name__ == '__main__':

@@ -11,54 +11,63 @@ import boxsettings
 from log import LogUtil
 
 
-def do_update(pool_settings):
+def do_update(pool_settings, logger):
     # Checking if an update is required
     if pool_settings.do_update() and pool_settings.is_online():
-        logging.info('We will make a git pull')
+        logger.info('We will make a git pull')
         subprocess.call(["git", "pull"])
-        logging.info('Update done')
+        logger.info('Update done')
     else:
-        logging.info('We do NOT make a git pull')
+        logger.info('We do NOT make a git pull')
 
-def take_measures(pool_settings):
+def take_measures(pool_settings, logger):
     if pool_settings.enable_reading() and pool_settings.is_online():
-        logging.info('We will make reading')
+        logger.info('We will make reading')
         poolMaster = PoolMaster()
         poolMaster.read_measures()
         poolMaster.send_measures()
-        logging.info('End of JOB')
+        logger.info('End of JOB')
     else:
-        logging.info('We do not take readings.')
+        logger.info('We do not take readings.')
 
-def send_battery_charge_level(pool_settings):
+def send_battery_charge_level(pool_settings, logger):
     try:
         pj = pijuice.PiJuice(1, 0x14)
         sender = Sender()
         charge = pj.status.GetChargeLevel()
         battery_level = charge['data']
-        logging.info('Battery charge in percent: %s' % battery_level)
+        logger.info('Battery charge in percent: %s' % battery_level)
         if pool_settings.is_online():
-            logging.info('Sending info to REST')
+            logger.info('Sending info to REST')
             response = sender.send_battery_level(battery_level)
-            logging.info('Answer: %s' % response.status_code)
+            logger.info('Answer: %s' % response.status_code)
         else:
-            logging.info(('Off-line. Battery level not sent'))
+            logger.info(('Off-line. Battery level not sent'))
     except:
-        logging.fatal("Cannot create pijuice object")
+        logger.fatal("Cannot create pijuice object")
 
 
 
-def main(pool_settings):
+def main():
     time.sleep(30)  # to wait for network goes up
     try:
+        logging.debug('PoolSettings will be called')
+        pool_settings = PoolSettings()
+        log_util = LogUtil()
+        log_level = log_util.get_log_level(pool_settings.log_level())
+        logger = logging.getLogger(__name__)
+        logger.setLevel(log_level)
 
+        logger.debug('End of PoolSetting job')
+        # PoolSettings is able to handle off-line case
+        # and will decide if update and readings will be made.
         # If update is required
-        do_update(pool_settings)
+        do_update(pool_settings, logger)
 
         # Taking readings eventually
-        take_measures(pool_settings)
+        take_measures(pool_settings, logger)
 
-        send_battery_charge_level(pool_settings)
+        send_battery_charge_level(pool_settings, logger)
 
 
         # Schedule next wakeup and doing shutdown
@@ -79,14 +88,9 @@ def main(pool_settings):
 
 if __name__ == '__main__':
     logname = boxsettings.LOG_FILE
-    pool_settings = PoolSettings()
-    # PoolSettings is able to handle off-line case
-    # and will decide if update and readings will be made.
-    log_util = LogUtil()
-    log_level = log_util.get_log_level(pool_settings.log_level())
     logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='w',
-                        level=log_level)
-    main(pool_settings)
+                        level=logging.DEBUG)
+    main()
 
 
 
