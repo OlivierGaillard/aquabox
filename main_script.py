@@ -64,7 +64,7 @@ def main(pool_settings):
         # Schedule next wakeup and doing shutdown
         wake_up = WakeUp(pool_settings)
         wake_up.prepare_wakeup()
-        wake_up.do_shutdown()
+        wake_up.do_shutdown() # the log file is sent here
     except:
         time.sleep(10)
         logutil = LogUtil()
