@@ -99,12 +99,12 @@ class WakeUp:
             print('We will MAKE a shutdown')
             print('We send the logfile just before')
             logger.info('Sending log file just before')
-            logutil = LogUtil()
-            logutil.read_log(boxsettings.LOG_FILE)
             try:
                 sender = Sender()
                 logger.info('Bye bye.')
                 time.sleep(10)
+                logutil = LogUtil()
+                logutil.read_log(boxsettings.LOG_FILE)
                 sender.send_log(logutil.log_text)
             except:
                 msg = "problem occured when attempting to send the log."
