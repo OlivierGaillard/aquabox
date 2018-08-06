@@ -37,14 +37,21 @@ class PoolMaster:
         logger.debug('ORP: %s' % self.orp_value)
 
         logger.debug('querying pH 3 times')
+        max_tries_ph = 3
         ph_values = []
-        for i in range(0, 3):
+        for i in range(0, max_tries_ph):
             ph = self.raspi.get_ph_from_pi()
             logger.debug('%s. pH = %s' % (i+1, ph))
-            ph_values.append(ph)
-        self.ph_value = sum(ph_values) / len(ph_values)
-        logger.debug('Middle value of pH: %s' % self.ph_value)
-        
+            if ph <= 2:
+                logger.warning('we do not value <= 2')
+            else:
+                ph_values.append(ph)
+        if len(ph_values) > 0:
+            self.ph_value = sum(ph_values) / len(ph_values)
+            logger.debug('Middle value of pH: %s' % self.ph_value)
+        else:
+            self.ph_value = 0
+            logger.warning('We was not able to read a valid pH value. Sending default one: %s' % 0)
         logger.debug('END readings.')
         self.readings_done = True
 
