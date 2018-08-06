@@ -27,15 +27,24 @@ class PoolMaster:
 
     def read_measures(self):
         logger.debug("Begin readings...")
+
         logger.debug('querying temperature')
         self.temp_value = self.raspi.get_temp_from_pi()
         logger.debug('Temp: %s' % self.temp_value)
+
         logger.debug('querying ORP')
         self.orp_value = self.raspi.get_orp_from_pi()
         logger.debug('ORP: %s' % self.orp_value)
-        logger.debug('querying pH')
-        self.ph_value = self.raspi.get_ph_from_pi()
-        logger.debug('pH: %s' % self.ph_value)
+
+        logger.debug('querying pH 3 times')
+        ph_values = []
+        for i in range(0, 3):
+            ph = self.raspi.get_ph_from_pi()
+            logger.debug('%s. pH = %s' % (i+1, ph))
+            ph_values.append(ph)
+        self.ph_value = sum(ph_values) / len(ph_values)
+        logger.debug('Middle value of pH: %s' % self.ph_value)
+        
         logger.debug('END readings.')
         self.readings_done = True
 
