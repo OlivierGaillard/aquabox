@@ -69,18 +69,26 @@ class TestApi(unittest.TestCase):
         status_code = sender.del_deg(id)
         self.assertEqual(200, status_code)
 
-    def btest_sender_deg_minus(self):
+    def test_sender_deg_toolow(self):
         sender = Sender()
         response = sender.send_deg(-23.000)
-        self.assertEqual(201, response.status_code)
+        self.assertEqual(400, response.status_code)
 
 
-    def btest_sender_ph(self):
+    def test_sender_ph_zero(self):
         logging.info('pH sending test')
         sender = Sender()
-        response = sender.send_ph(self.get_random_ph())
+        response = sender.send_ph(0)
+        logging.info('pH sent. Response: %s' % response.status_code)
+        self.assertEqual(400, response.status_code)
+
+    def test_sender_ph_3(self):
+        logging.info('pH sending test')
+        sender = Sender()
+        response = sender.send_ph(3)
         logging.info('pH sent. Response: %s' % response.status_code)
         self.assertEqual(201, response.status_code)
+
 
     def btest_sender_redox(self):
         sender = Sender()

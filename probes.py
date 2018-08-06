@@ -1,11 +1,11 @@
 import random
-from abc import ABCMeta, abstractmethod, abstractproperty
-import io
+from abc import ABCMeta, abstractmethod
 import fcntl
 import time
 import boxsettings
 import logging
 
+logger = logging.getLogger(__name__)
 
 class ProbesController:
 
@@ -90,6 +90,10 @@ class Probes:
     def factory(type):
         if type == 'mock_ph':
             return MockPh()
+        if type == 'mock_temp':
+            return MockTemp()
+        if type == 'mock_orp':
+            return MockOrp()
         if type == 'ph':
             return Ph(address=boxsettings.PH_ADDRESS)
         if type == 'temp':
@@ -126,6 +130,9 @@ class I2Connector:
         self.current_addr = addr
 
 
+
+
+
 class Ph(Probes):
     """
     pH_EZO based on Atlas Scientific i2c.py code
@@ -149,12 +156,9 @@ class Ph(Probes):
         self.file_write = self.connector.file_write
         self.file_read  = self.connector.file_read
         if boxsettings.FAKE_DATA:
-            logging.warning('Sending fake data')
+            logger.warning('Sending fake data')
 
-    def get_random_ph(self):
-        value = random.randint(3, 10)
-        value += random.random()
-        return value
+
 
 
     def write_command(self, cmd):
@@ -178,6 +182,7 @@ class Ph(Probes):
             pass
         else:
             print ("code inconnu: (in read_value)" + str(code))
+            logger.warning("code inconnu: (in read_value)" + str(code))
 
 
 
@@ -188,9 +193,9 @@ class Ph(Probes):
             self.write_command(self.controller.get_ph_Cmd())
             self.read_value(31)
         if self.success:
-            logging.info("Success: value read in %s times." % nb)
+            logger.info("Success: value read in %s times." % nb)
         else:
-            logging.warning('Fail: unable to read value. Returning default (0.0) Tried %s times.' % nb)
+            logger.warning('Fail: unable to read value. Returning default (0.0) Tried %s times.' % nb)
         if self.probe_value < 0.0:
             self.probe_value = 0.0
         return self.probe_value
@@ -201,11 +206,33 @@ class Ph(Probes):
         return res
 
     def get_ph(self):
-        if boxsettings.FAKE_DATA:
-            return self.get_random_ph()
         return self.get_value()
 
+
+class MockPh(Probes):
+
+    def get_random_ph(self):
+        value = random.randint(3, 10)
+        value += random.random()
+        return value
+
+    def read_value(self):
+        return self.get_random_ph()
+
+    def write_command(self, cmd):
+        logger.debug('cmd: %s' % cmd)
+
+    def get_ph(self):
+        return self.get_random_ph()
+
+
 class Temp(Ph):
+
+    def get_temp(self):
+        logger.debug('Getting temperature')
+        return self.get_value()
+
+class MockTemp(Probes):
 
     def fake_temperature(self):
         deg_value = random.randint(3, 30)
@@ -213,11 +240,23 @@ class Temp(Ph):
         return deg_value
 
     def get_temp(self):
-        if boxsettings.FAKE_DATA:
-            return self.fake_temperature()
-        return self.get_value()
+        logger.debug('Returning fake temperature')
+        return self.fake_temperature()
+
+    def read_value(self):
+        return self.fake_temperature()
+
+    def write_command(self, cmd):
+        logger.debug('cmd: %s' % cmd)
+
+
 
 class Orp(Ph):
+
+    def get_orp(self):
+        return self.get_value()
+
+class MockOrp(Probes):
 
     def get_random_redox(self):
         value = random.randint(100, 600)
@@ -225,87 +264,12 @@ class Orp(Ph):
         return value
 
     def get_orp(self):
-        if boxsettings.FAKE_DATA:
-            return self.get_random_redox()
-        return self.get_value()
+        return self.get_random_redox()
 
-class MockPh(Ph):
-    """
-    Simulates a pH probe: receives commands and will answer.
-    """
-
-    ready = True
-    command = ''
-    answer = ''
-
-    led_state = ord('L') + ord(',') + ord('0')
-    ph = 7.001
-
-    def __init__(self):
-        self.controller = ProbesController()
-
-    def _convert_to_ascii(self, str):
-        tmp = ''
-        for s in str:
-            tmp += chr(ord(s))
-        return tmp
-
-    def set_led_on(self):
-        self.led_state = ord('1')
-
-    def set_led_off(self):
-        self.led_state = ord('0')
-
-    def get_state(self):
-        return self.led_state
-
-    def __fake_answer(self, cmd):
-        """Build answer based on commmand"""
-        if cmd == 'L,?':
-            self.answer =  self.get_state()
-
-    def __fake_write(self, cmd):
-        if cmd == 'L,1':
-            self.set_led_on()
-        if cmd == 'L,0':
-            self.set_led_off()
-
-
-    def create_answer(self):
-        ok_byte = bytes(1) # bytearray(['1'])
-        end_data_marker = '\x00'
-        self.answer = ok_byte + self.answer + end_data_marker
-
-    def read_value(self, num_of_bytes=31):
-        res = self.create_answer()
-        response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
-        code = response[0]
-        if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
-            char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
-            #char_list = map(lambda x: chr(ord(x)), list(response[1:]))
-            answer =  ''.join(char_list)
-            self.success = True
-            return  answer
-        elif code == self.STILL_PROCESSING_NOT_READY:
-            return code
-        else:
-            return code
+    def read_value(self):
+        return self.get_random_redox()
 
     def write_command(self, cmd):
-        self.command = cmd
-        self.__fake_write(cmd)
+        logger.debug('cmd: %s' % cmd)
 
 
-    def get_value(self):
-        self.tries += 1
-        self.write_command(self.controller.get_ph_Cmd())
-        res = self.read_value(31)
-        if self.success:
-            return res
-        else:
-            if self.tries < self.max_tries:
-                if self.tries > 5:
-                    time.sleep(2.0)
-                self.get_value()
-            else:
-                print ("unable to get get_ph")

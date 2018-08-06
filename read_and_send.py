@@ -1,11 +1,9 @@
 #!/usr/bin/python
-import logging
+
 from restclient import Sender
-from probes import Probes
-import time
-import os
 import logging
-from log import LogUtil
+from box import RaspiFactory
+import boxsettings
 
 logger = logging.getLogger(__name__)
 
@@ -16,42 +14,58 @@ class PoolMaster:
     """
 
     def __init__(self):
-        # TODO: checking i2c shoud not appear here
-        logger.info('waiting for I2C-1 channel...')
-        while not os.path.exists('/dev/i2c-1'):
-            time.sleep(5.0)
-        logger.info('Starting readings')
-        self.ph = Probes.factory('ph')
-        self.ph_value = 0.001
-        self.orp = Probes.factory('orp')
-        self.orp_value = 0.1
-        self.temp = Probes.factory('temp')
-        self.temp_value = 0.001
-        logger.info('PoolMaster is initialized')
-        # This script is started at reboot by cron.
-        # Since the start is very early in the boot sequence we wait for the i2c-1 device
+        if boxsettings.FAKE_DATA: # we use mockups
+            logger.debug("PoolMaster init: we use mockups")
+            self.raspi = RaspiFactory.getRaspi('MockupRaspi')
+        else:
+            logger.debug("PoolMaster init: we use real probes and real pi")
+            self.raspi = RaspiFactory.getRaspi('Raspi')
+
+        logger.debug('PoolMaster is initialized')
+        self.readings_done = False
+        self.sendings_done = False
 
     def read_measures(self):
-        logger.info("Begin readings...")
-        logger.info('querying temperature')
-        self.temp_value = self.temp.get_temp()
-        logger.info('Temp: %s' % self.temp_value)
-        logger.info('querying ORP')
-        self.orp_value = self.orp.get_orp()
-        logger.info('ORP: %s' % self.orp_value)
-        logger.info('querying pH')
-        self.ph_value = self.ph.get_ph()
-        logger.info('pH: %s' % self.ph_value)
-        logger.info('END readings.')
+        logger.debug("Begin readings...")
+        logger.debug('querying temperature')
+        self.temp_value = self.raspi.get_temp_from_pi()
+        logger.debug('Temp: %s' % self.temp_value)
+        logger.debug('querying ORP')
+        self.orp_value = self.raspi.get_orp_from_pi()
+        logger.debug('ORP: %s' % self.orp_value)
+        logger.debug('querying pH')
+        self.ph_value = self.raspi.get_ph_from_pi()
+        logger.debug('pH: %s' % self.ph_value)
+        logger.debug('END readings.')
+        self.readings_done = True
+
 
     def send_measures(self):
         logger.info('Sending measures..')
+        redox_sent = ph_sent = temp_sent = False
         sender = Sender()
-        logger.info('orp...')
-        sender.send_redox(float(self.orp_value))
-        logger.info('temperature...')
-        sender.send_deg(float(self.temp_value))
+        logger.debug('orp...')
+        try:
+            sender.send_redox(float(self.orp_value))
+            redox_sent = True
+        except:
+            logger.warning('We was not able to send redox to REST')
+        logger.debug('temperature...')
+        try:
+            sender.send_deg(float(self.temp_value))
+            temp_sent = True
+        except:
+            logger.warning('We was not able to send deg to REST')
+
         logger.debug('pH...')
-        sender.send_ph(float(self.ph_value))
-        logger.debug('pH end.')
-        logger.info('END sending.')
+        try:
+            sender.send_ph(float(self.ph_value))
+            ph_sent = True
+        except:
+            logger.warning('We was not able to send pH to REST')
+
+        self.sendings_done = redox_sent and ph_sent and temp_sent
+        if self.sendings_done:
+            logger.info('All measures sent.')
+        else:
+            logger.warning('Some measures fail to be sent.')

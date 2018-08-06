@@ -10,7 +10,7 @@ from log import LogUtil
 import boxsettings
 from restclient import Sender
 
-logger = logging.getLogger('shutdown.py')
+logger = logging.getLogger(__name__)
 #logger.setLevel(log_level)
 
 class PijuiceException(Exception):

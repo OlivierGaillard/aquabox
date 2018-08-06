@@ -8,6 +8,7 @@ import time
 from poolsettings import PoolSettings
 from read_and_send import PoolMaster
 import boxsettings
+from box import RaspiFactory
 from log import LogUtil
 
 
@@ -32,10 +33,14 @@ def take_measures(pool_settings, logger):
 
 def send_battery_charge_level(pool_settings, logger):
     try:
-        pj = pijuice.PiJuice(1, 0x14)
+        raspi = None
+        if boxsettings.FAKE_DATA:
+            raspi = RaspiFactory.getRaspi('Mockup')
+        else:
+            raspi = RaspiFactory.getRaspi('Raspi')
         sender = Sender()
-        charge = pj.status.GetChargeLevel()
-        battery_level = charge['data']
+        battery_level = raspi.get_charge_level()
+
         logger.info('Battery charge in percent: %s' % battery_level)
         if pool_settings.is_online():
             logger.info('Sending info to REST')
@@ -88,7 +93,8 @@ def main():
 
 if __name__ == '__main__':
     logname = boxsettings.LOG_FILE
-    logging.basicConfig(format='%(levelname)s\t: %(asctime)s : %(message)s', filename=logname, filemode='w',
+    logging.basicConfig(format='%(levelname)s\t: %(name)s\t\t: %(asctime)s : %(message)s', filename=logname,
+                        filemode='w',
                         level=logging.DEBUG)
     main()
 
