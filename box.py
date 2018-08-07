@@ -79,7 +79,7 @@ class Raspi(RaspiFactory):
 
     def initSensors(self):
         logger.debug('waiting for I2C-1 channel...')
-        while not os.path.exists('/dev/i2c'):
+        while not os.path.exists('/dev/i2c-1'):
             time.sleep(5.0)
         self.ph_probe   = Probes.factory('ph')
         self.orp_probe  = Probes.factory('orp')

@@ -45,8 +45,9 @@ class PoolMaster:
             if ph <= 2:
                 logger.warning('we do not value <= 2')
             else:
-                ph_values.append(ph)
+                ph_values.append(float(ph))
         if len(ph_values) > 0:
+            print "ph: ", ph_values
             self.ph_value = sum(ph_values) / len(ph_values)
             logger.debug('Middle value of pH: %s' % self.ph_value)
         else:
