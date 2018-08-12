@@ -4,9 +4,7 @@ from box import RaspiFactory
 from read_and_send import PoolMaster
 import logging
 from poolsettings import PoolSettings
-from log import LogUtil
 from restclient import Sender
-
 
 
 class TestMainScript(unittest.TestCase):
@@ -32,27 +30,27 @@ class TestMainScript(unittest.TestCase):
         self.assertIsNotNone(raspi.get_ph_from_pi())
         self.assertIsNotNone(raspi.get_orp_from_pi())
 
-
-    def test_poolmaster(self): # if boxsettings has FAKE_DATA = True or not
-        poolmaster = PoolMaster()
+    def btest_poolmaster(self): # if box settings has FAKE_DATA = True or not
+        pool_settings = PoolSettings()
+        raspi = RaspiFactory.getRaspi('Mock')
+        poolmaster = PoolMaster(raspi)
         poolmaster.read_measures()
         self.assertTrue(poolmaster.readings_done)
-        poolmaster.send_measures()
-        self.assertTrue(poolmaster.sendings_done)
+        if pool_settings.is_online():
+            poolmaster.send_measures()
+            self.assertTrue(poolmaster.sendings_done)
 
     def btest_send_charge_level(self):
         raspi = RaspiFactory.getRaspi('Mock')
         sender = Sender()
-        response = sender.send_battery_level(raspi.get_charge_level())
-        self.assertEqual(201, response.status_code)
+        if sender.is_online():
+            response = sender.send_battery_level(raspi.get_charge_level())
+            self.assertEqual(201, response.status_code)
 
-    def btest_pool_settings(self):
-        pool_settings = PoolSettings()
-        log_util = LogUtil()
-        log_level = log_util.get_log_level(pool_settings.log_level())
-        logger = logging.getLogger(__name__)
-        logger.setLevel(log_level)
-        logger.debug('Log level: %s' % log_level)
+    def test_wakeup(self):
+        raspi = RaspiFactory.getRaspi('Mock')
+        raspi.setup_wakeup()
+        raspi.shutdown()
 
 
 
@@ -61,6 +59,5 @@ if __name__ == '__main__':
     logging.basicConfig(format='%(levelname)s\t: %(name)s\t: %(asctime)s : %(message)s', filename=logname, filemode='w',
                         level=logging.DEBUG)
     logger = logging.getLogger(__name__)
-    logger.setLevel(logging.DEBUG)
-
+    logger.setLevel(logging.INFO)
     unittest.main()

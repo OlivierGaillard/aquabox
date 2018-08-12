@@ -1,125 +1,101 @@
 from __future__ import print_function
 import time
-import pijuice
-import subprocess
-import datetime
-import sys
 import logging
 from poolsettings import PoolSettings, HoursUtils
 from log import LogUtil
 import boxsettings
 from restclient import Sender
 
-logger = logging.getLogger(__name__)
-#logger.setLevel(log_level)
-
-class PijuiceException(Exception):
+class PijuiceAlarmException(Exception):
     message = ""
 
     def __init__(self, msg):
         self.message = msg
-
-
-
-
 
 class WakeUp:
 
     pj = None
 
     def __init__(self, poolSettings):
+        self.logger = logging.getLogger('WakeUp')
         self.pool_settings = poolSettings
-
-        if not self.is_pijuice_available():
-            logger.fatal('As pijuice fails we eventually shutdown now.')
-            if self.pool_settings.enable_shutdown():
-                logger.info('Shutdown')
-                self.shut_down()
-            else:
-                logger.info('No shutdown now.')
-
-        t = datetime.datetime.utcnow()
-        self.hoursUtil = HoursUtils(self.pool_settings.hours_of_readings(), t.hour)
+        self.hoursUtil = HoursUtils(self.pool_settings.hours_of_readings())
+        self.alarm_time = {'year'  : 'EVERY_YEAR',
+                           'month' : 'EVERY_MONTH',
+                           'day'   : 'EVERY_DAY',
+                           'hour'  : 0,
+                           'minute' : 0,
+                           'second' : 0}
+        self.prepare_wakeup_hour()
 
 
 
-
-    def is_pijuice_available(self):
-        try:
-            self.pj = pijuice.PiJuice(1, 0x14)
-            return True
-        except:
-            logger.fatal("Cannot create pijuice object")
-            raise PijuiceException(msg="Cannot create pijuice object")
-
-    def shut_down(self):
-        subprocess.call(["sudo", "poweroff"])
-
-
-    def prepare_wakeup(self):
-            # Rely on RTC to keep the time
-        #subprocess.call(["sudo", "hwclock", "--hctosys"])
-        a = {}
-        a['year'] = 'EVERY_YEAR'
-        a['month'] = 'EVERY_MONTH'
-        a['day'] = 'EVERY_DAY'
-        # a['hour'] = 'EVERY_HOUR'
-
-
-        logger.info('Retrieving hours of readings')
-
+    def prepare_wakeup_hour(self):
+        """Hours data for wakeup."""
+        self.logger.info('Retrieving hours of readings')
         self.next_hour = self.hoursUtil.next_reading_hour()
-        logger.info('Next reading hour in local time: %s' % self.hoursUtil.next_reading_hour_local())
+        self.logger.info('Next reading hour in local time: %s' % self.hoursUtil.next_reading_hour_local())
+        self.alarm_time['hour'] = self.hoursUtil.next_reading_hour()
+
+    def connect_pijuice(self, pj):
+        self.pj = pj
+
+    def set_wakeup_hour_on_pijuice(self):
+        self.logger.debug('setting wakeup hours on pijuice...')
+        try:
+            status = self.pj.rtcAlarm.SetAlarm(self.alarm_time)
+            if status['error'] != 'NO_ERROR':
+                self.logger.warning('Cannot set alarm')
+                raise PijuiceAlarmException(msg='prepare_wakeup: I cannot set alarm')
+            else:
+                self.logger.info('Alarm set for %s UTC' % str(self.raspi.pj.rtcAlarm.GetAlarm()))
+        except Exception, e:
+            self.logger.warning('set_wakeup_hour: failed to set wakeup hour', exc_info=True)
 
 
-        a['hour'] = self.hoursUtil.next_reading_hour()
-        a['minute'] = 0
-        a['second'] = 0
-        status = self.pj.rtcAlarm.SetAlarm(a)
-        if status['error'] != 'NO_ERROR':
-            logger.warning('Cannot set alarm')
-            raise PijuiceException(msg='prepare_wakeup: I cannot set alarm')
-        else:
-            logger.info('Alarm set for %s UTC' % str(self.pj.rtcAlarm.GetAlarm()))
-            print('Alarm set for %s UTC' % str(self.pj.rtcAlarm.GetAlarm()))
-
+    def set_wakeup_on(self):
+        """Enable alarm"""
         # Enable wakeup, otherwise power to the RPi will not be
         # applied when the RTC alarm goes off
-        self.pj.rtcAlarm.SetWakeupEnabled(True)
-        time.sleep(1.0)
+        self.logger.debug('setting alarm ON...')
+        try:
+            self.raspi.pj.rtcAlarm.SetWakeupEnabled(True)
+            time.sleep(2.0)
+            self.logger.debug('done')
+        except Exception, e:
+            self.logger.warning('Wakeup: failed to enable wakeup.', exc_info = True)
 
-    def do_shutdown(self):
+    def send_logfile(self):
+        self.logger.info('Sending log file')
+        try:
+            sender = Sender()
+            logger.info('Bye bye.')
+            time.sleep(10)
+            logutil = LogUtil()
+            logutil.read_log(boxsettings.LOG_FILE)
+            sender.send_log(logutil.log_text)
+            self.logger.debug('done')
+        except Exception, e:
+            msg = "problem occured when attempting to send the log."
+            self.logger.fatal(msg, exc_info=True)
 
+    def shutdown_pijuice(self, seconds):
         # PiJuice shuts down power to Rpi after 20 sec from now
         # This leaves sufficient time to execute the shutdown sequence
         # checking if an update is required
         # checking if a shutdown should be made
+        self.logger.debug('shutdown of pijuice...')
         if self.pool_settings.enable_shutdown():
-            logger.info('We will MAKE a shutdown')
-            print('We will MAKE a shutdown')
-            print('We send the logfile just before')
-            logger.info('Sending log file just before')
-            try:
-                sender = Sender()
-                logger.info('Bye bye.')
-                time.sleep(10)
-                logutil = LogUtil()
-                logutil.read_log(boxsettings.LOG_FILE)
-                sender.send_log(logutil.log_text)
-            except:
-                msg = "problem occured when attempting to send the log."
-                logger.fatal(msg)
-
-            self.pj.power.SetPowerOff(20)
-            self.shut_down()
+            self.logger.info('We will MAKE a shutdown in %s seconds.' % seconds)
+            self.pj.power.SetPowerOff(seconds) # 20
         else:
-            print('We do NOT make a shutdown')
-            logger.info('We do NOT make a shutdown')
+            self.logger.info('Settings do not plan a shutdown')
 
 
 if __name__ == '__main__':
     pool_settings = PoolSettings()
     wake_up = WakeUp(poolSettings=pool_settings)
-    wake_up.prepare_wakeup()
-    wake_up.do_shutdown()
+    wake_up.prepare_wakeup_hour()
+    wake_up.set_wakeup_on()
+    wake_up.shutdown_pijuice()
 

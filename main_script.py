@@ -1,15 +1,16 @@
 from __future__ import print_function
-import pijuice
 import subprocess
 import logging
+from logging.handlers import RotatingFileHandler
 from restclient import Sender
-from shutdown import WakeUp
 import time
 from poolsettings import PoolSettings
 from read_and_send import PoolMaster
 import boxsettings
 from box import RaspiFactory
 from log import LogUtil
+import os
+
 
 
 def do_update(pool_settings, logger):
@@ -21,26 +22,20 @@ def do_update(pool_settings, logger):
     else:
         logger.info('We do NOT make a git pull')
 
-def take_measures(pool_settings, logger):
+def take_measures(raspi, pool_settings, logger):
     if pool_settings.enable_reading() and pool_settings.is_online():
         logger.info('We will make reading')
-        poolMaster = PoolMaster()
+        poolMaster = PoolMaster(raspi=raspi)
         poolMaster.read_measures()
         poolMaster.send_measures()
         logger.info('End of JOB')
     else:
         logger.info('We do not take readings.')
 
-def send_battery_charge_level(pool_settings, logger):
+def send_battery_charge_level(raspi, pool_settings, logger):
     try:
-        raspi = None
-        if boxsettings.FAKE_DATA:
-            raspi = RaspiFactory.getRaspi('Mockup')
-        else:
-            raspi = RaspiFactory.getRaspi('Raspi')
         sender = Sender()
         battery_level = raspi.get_charge_level()
-
         logger.info('Battery charge in percent: %s' % battery_level)
         if pool_settings.is_online():
             logger.info('Sending info to REST')
@@ -53,50 +48,74 @@ def send_battery_charge_level(pool_settings, logger):
 
 
 
-def main():
-    time.sleep(30)  # to wait for network goes up
+def main(pool_settings, logger):
+    print ('Waiting 3 seconds before network goes up')
+    # TODO: reset waiting time to 30 seconds
+    time.sleep(3)  # to wait for network goes up
+    do_update(pool_settings, logger)
+    logger.debug('Initialising raspi...')
+    raspi = None
     try:
-        logging.debug('PoolSettings will be called')
-        pool_settings = PoolSettings()
-        log_util = LogUtil()
-        log_level = log_util.get_log_level(pool_settings.log_level())
-        logger = logging.getLogger(__name__)
-        logger.setLevel(log_level)
+        if boxsettings.FAKE_DATA:
+            raspi = RaspiFactory.getRaspi('mock')
+        else:
+            raspi = RaspiFactory.getRaspi('Raspi')
+    except Exception, e:
+        logger.fatal('Fail to init raspi', exc_info=True)
+        if pool_settings.enable_shutdown():
+            logger.info('doing shutdown, as planned')
+            raspi.shutdown()
+        else:
+            logger.fatal('No shutdown, as planned')
+    logger.debug('Raspi initialised.')
+    take_measures(raspi, pool_settings, logger)
+    send_battery_charge_level(raspi, pool_settings, logger)
 
-        logger.debug('End of PoolSetting job')
-        # PoolSettings is able to handle off-line case
-        # and will decide if update and readings will be made.
-        # If update is required
-        do_update(pool_settings, logger)
-
-        # Taking readings eventually
-        take_measures(pool_settings, logger)
-
-        send_battery_charge_level(pool_settings, logger)
-
-
-        # Schedule next wakeup and doing shutdown
-        wake_up = WakeUp(pool_settings)
-        wake_up.prepare_wakeup()
-        wake_up.do_shutdown() # the log file is sent here
-    except:
-        time.sleep(10)
-        logutil = LogUtil()
-        logutil.read_log(boxsettings.LOG_FILE)
-        try:
-            sender = Sender()
-            sender.send_log(logutil.log_text)
-        except:
-            msg = "problem occured when attempting to send the log."
-            logging.fatal(msg)
+    raspi.setup_wakeup()
+    raspi.shutdown() ## logs are sent too
 
 
 if __name__ == '__main__':
     logname = boxsettings.LOG_FILE
-    logging.basicConfig(format='%(levelname)s\t: %(name)s\t\t: %(asctime)s : %(message)s', filename=logname,
-                        filemode='w',
-                        level=logging.DEBUG)
-    main()
+    pool_settings = PoolSettings()
+    log_util = LogUtil()
+    log_level = log_util.get_log_level(pool_settings.log_level())
+    # create logger at the root level. Otherwise the loggers in module will not use this configuration.
+    logger = logging.getLogger()
+    logger.setLevel(log_level)
+
+
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+
+    fh = logging.FileHandler(logname, mode='w')
+    fh.setLevel(logging.DEBUG)
+
+    # create a permanent file logger with rotate
+    current_dir = os.path.abspath('.')
+    main_log = os.path.join(current_dir, 'mainlog.log')
+    fh2 = logging.FileHandler(main_log)
+    fh2 = RotatingFileHandler(main_log, maxBytes=10485760, backupCount=10)
+
+    # create formatter
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    # add formatter to ch
+    ch.setFormatter(formatter)
+
+    fh.setFormatter(formatter)
+    fh2.setFormatter(formatter)
+
+    # add ch to logger
+    logger.addHandler(ch)
+
+    logger.addHandler(fh)
+    logger.addHandler(fh2)
+
+    logger.debug('logger set to log level %s' % log_level)
+    logger.debug('permanent log file: %s' % main_log)
+    main(pool_settings, logger)
 
 
 

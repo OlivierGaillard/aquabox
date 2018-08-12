@@ -11,6 +11,19 @@ class Sender:
         self.user_box = boxsettings.REST_USER
         self.user_box_passwd = boxsettings.REST_PASSWORD
         self.logger = logging.getLogger(__name__)
+        self.online = False
+        try:
+            r = requests.get(self.live_server_url)
+            if r.status_code == 200:
+                self.online = True
+                self.logger.debug('Sender can reach %s' % self.live_server_url)
+            else:
+                self.logger.debug('Sender is online but cannot reach %s' % self.live_server_url)
+        except:
+            self.logger.debug('Sender cannot reach %s' % self.live_server_url)
+
+    def is_online(self):
+        return self.online
 
 
     def __send_data(self, json, urlsuffix):

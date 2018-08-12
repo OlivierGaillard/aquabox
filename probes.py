@@ -5,8 +5,6 @@ import time
 import boxsettings
 import logging
 
-logger = logging.getLogger(__name__)
-
 class ProbesController:
 
     def led_State(self):
@@ -52,7 +50,9 @@ class Probes:
                SUCCESSFUL_REQUEST : 'SUCCESSFUL REQUEST'}
 
     def __init__(self):
+        self.logger = logging.getLogger('Probes')
         self.controller = ProbesController()
+        self.logger.debug('ProbesController instance created')
 
     def query_led_state(self):
         self.write_command(self.controller.led_State())
@@ -88,13 +88,16 @@ class Probes:
 
     @staticmethod
     def factory(type):
+        logger = logging.getLogger('Static Probes factory')
         if type == 'mock_ph':
+            logger.debug('MockPh')
             return MockPh()
         if type == 'mock_temp':
             return MockTemp()
         if type == 'mock_orp':
             return MockOrp()
         if type == 'ph':
+            logger.debug('Ph probe with address %s ' % boxsettings.PH_ADDRESS)
             return Ph(address=boxsettings.PH_ADDRESS)
         if type == 'temp':
             return Temp(address=boxsettings.TEMP_ADDRESS)
@@ -115,10 +118,13 @@ class I2Connector:
     file_read  = None
 
     def __init__(self, address):
+        self.logger = logging.getLogger('I2Connector')
+        self.logger.debug('Init..')
         self.current_address = address
         self.file_write = open(self.base_bus_path + str(self.default_bus), "wb", buffering=0)
         self.file_read = open(self.base_bus_path + str(self.default_bus), "rb", buffering=0)
         self.set_i2c_address(address)
+        self.logger.debug('done')
 
     def set_i2c_address(self, addr):
         # set the I2C communications to the slave specified by the address
@@ -150,39 +156,39 @@ class Ph(Probes):
 
 
     def __init__(self, address=default_address):
-
         self.controller = ProbesController()
         self.connector = I2Connector(address=address)
         self.file_write = self.connector.file_write
         self.file_read  = self.connector.file_read
         if boxsettings.FAKE_DATA:
-            logger.warning('Sending fake data')
-
-
-
+            self.logger.warning('Sending fake data')
+        else:
+            self.logger.info('Sending real data')
+        self.logger.debug('Init done')
 
     def write_command(self, cmd):
+        self.logger.debug('writing command %s' % cmd)
         cmd += "\00"
         self.file_write.write(cmd)
-        #print ('sleeping %s sec' % self.long_timeout)
+        self.logger.debug('waiting %s' % self.long_timeout)
         time.sleep(self.long_timeout)
 
 
     def read_value(self, num_of_bytes=31):
+        self.logger.debug('read_value')
         res = self.file_read.read(num_of_bytes)  # read from the board
         response = filter(lambda x: x != '\x00', res)  # remove the null characters to get the response
         code = ord(response[0])
         if code == self.SUCCESSFUL_REQUEST:  # if the response isn't an error
+            self.logger.debug('Sucessful reading')
             char_list = map(lambda x: chr(ord(x) & ~0x80), list(response[1:]))
             answer =  ''.join(char_list)
             self.success = True
             self.probe_value = answer
         elif code == self.STILL_PROCESSING_NOT_READY:
-            #print ("NOT READY. ")
-            pass
+            self.logger.debug('NOT READY')
         else:
-            print ("code inconnu: (in read_value)" + str(code))
-            logger.warning("code inconnu: (in read_value)" + str(code))
+            self.logger.warning("code inconnu: (in read_value)" + str(code))
 
 
 
@@ -193,9 +199,9 @@ class Ph(Probes):
             self.write_command(self.controller.get_ph_Cmd())
             self.read_value(31)
         if self.success:
-            logger.info("Success: value read in %s times." % nb)
+            self.logger.info("get_value: Success, value read in %s times." % nb)
         else:
-            logger.warning('Fail: unable to read value. Returning default (0.0) Tried %s times.' % nb)
+            self.logger.warning('Fail: unable to read value. Returning default (0.0) Tried %s times.' % nb)
         if self.probe_value < 0.0:
             self.probe_value = 0.0
         return self.probe_value
@@ -214,13 +220,14 @@ class MockPh(Probes):
     def get_random_ph(self):
         value = random.randint(3, 10)
         value += random.random()
+        self.logger.debug('MockPh value: %s' % value)
         return value
 
     def read_value(self):
         return self.get_random_ph()
 
     def write_command(self, cmd):
-        logger.debug('cmd: %s' % cmd)
+        self.logger.debug('cmd: %s' % cmd)
 
     def get_ph(self):
         return self.get_random_ph()
@@ -229,7 +236,7 @@ class MockPh(Probes):
 class Temp(Ph):
 
     def get_temp(self):
-        logger.debug('Getting temperature')
+        self.logger.debug('Getting temperature')
         return self.get_value()
 
 class MockTemp(Probes):
@@ -240,14 +247,14 @@ class MockTemp(Probes):
         return deg_value
 
     def get_temp(self):
-        logger.debug('Returning fake temperature')
+        self.logger.debug('Returning fake temperature')
         return self.fake_temperature()
 
     def read_value(self):
         return self.fake_temperature()
 
     def write_command(self, cmd):
-        logger.debug('cmd: %s' % cmd)
+        self.logger.debug('cmd: %s' % cmd)
 
 
 
@@ -264,12 +271,14 @@ class MockOrp(Probes):
         return value
 
     def get_orp(self):
-        return self.get_random_redox()
+        val = self.get_random_redox()
+        self.logger.debug('MockOrp value %s' % val)
+        return val
 
     def read_value(self):
         return self.get_random_redox()
 
     def write_command(self, cmd):
-        logger.debug('cmd: %s' % cmd)
+        self.logger.debug('cmd: %s' % cmd)
 
 

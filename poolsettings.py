@@ -1,6 +1,9 @@
 import json
 import logging
+import datetime
 from restclient import Sender
+
+
 
 class PoolSettings:
     """Encapsulates pool settings like:
@@ -20,26 +23,27 @@ class PoolSettings:
     online = False
 
     def __init__(self):
+        self.logger = logging.getLogger('PoolSettings')
         sender = Sender()
         try:
             settings_json = sender.get_pool_settings()
             self.settings = settings_json[0]
-            logging.info('We are online. Saving settings to local JSON file %s ' % self.file_name)
+            self.logger.info('We are online. Saving settings to local JSON file %s ' % self.file_name)
             with open(self.file_name, 'w') as outfile:
                 json.dump(self.settings, outfile)
-            logging.info("Settings written to file.")
+            self.logger.info("Settings written to file.")
             self.online = True
-        except:
-            logging.warning('Connection error.')
-            logging.warning("trying to load previous settings from file, as network connection fails.")
+        except Exception, e:
+            self.logger.warning('Connection error.', exc_info=True)
+            self.logger.info("trying to load previous settings from file, as network connection fails.")
             file_name = 'settings.json'
             try:
                 with open(file_name) as infile:
                     self.settings = json.load(infile)
-                logging.info("Success reading from file")
-            except:
+                self.logger.info("Success reading from file")
+            except Exception, e:
                 # falling back to default
-                logging.warning("No file found. Using default values")
+                self.logger.warning("No file found. Using default values", exc_info=True)
 
     def is_online(self):
         return self.online
@@ -69,24 +73,27 @@ class HoursUtils:
     next_hour = 0
     current_hour = 0
 
-    def __init__(self, hours_enum, current_hour):
+    def __init__(self, hours_enum):
         """
         :param hours_enum: 8,12,18
         :return: [8,12,18]
         """
+        self.logger = logging.getLogger('HoursUtils')
         self.hours = [int(h)+self.UTC_DELTA for h in hours_enum.split(',')]
-        self.current_hour = current_hour
+        self.logger.debug('Reading hours: %s' % self.hours)
+        self.current_hour = datetime.datetime.utcnow()
         self.__set_next_hour()
 
     def __set_next_hour(self):
         next_h = 0
         for n in self.hours:
-            if self.current_hour < n:
+            if self.current_hour.hour < n:
                 next_h = n
                 break
         if next_h == 0:
             next_h = self.hours[0]
         self.next_hour = next_h
+        self.logger.debug('Next reading hour UTC: %s', self.next_hour)
 
 
     def next_reading_hour(self):

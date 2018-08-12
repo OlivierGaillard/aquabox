@@ -1,12 +1,14 @@
-import boxsettings
 import logging
-import time
+import time, datetime
 from abc import ABCMeta, abstractmethod
 import os
 from probes import Probes
-
-logger = logging.getLogger(__name__)
-
+import subprocess
+from poolsettings import PoolSettings
+from shutdown import WakeUp
+from log import LogUtil
+from restclient import Sender
+import boxsettings
 
 class RaspiFactory:
     """A factory to create a real or a mockup Raspberry Pi"""
@@ -16,25 +18,46 @@ class RaspiFactory:
     temp_probe = None
     ph_probe   = None
     orp_probe  = None
+    pj         = None # Pijuice
     ph_value = 0.001
     orp_value = 0.1
     temp_value = 0.001
 
+    pool_settings = None
+    wake_up = None
+
     def __init__(self):
+        self.pool_settings = PoolSettings()
         self.initSensors()
+        self.wake_up = WakeUp(self.pool_settings)
+        self.logger = logging.getLogger('RaspiFactory')
 
     @staticmethod
     def getRaspi(name):
+
+        logger = logging.getLogger('static:getRaspi')
         if name == 'Raspi':
             raspi = Raspi()
-            logger.debug('made a real raspi')
+            logger.debug('making a real raspi...')
+            raspi.initPijuice()
+            raspi.connect_pijuice()
+            logger.debug('Real raspi ready.')
             return raspi
         else:
             logger.debug('RaspiFactory: will create one MockRaspi')
             raspi = MockRaspi()
-            logger.debug('made a mock raspi')
+            raspi.initPijuice()
+            raspi.connect_pijuice()
+            logger.debug('Mock raspi ready')
             return raspi
 
+    @abstractmethod
+    def initPijuice(self):
+        pass
+
+    @abstractmethod
+    def connect_pijuice(self):
+        pass
 
     @abstractmethod
     def initSensors(self):
@@ -42,6 +65,7 @@ class RaspiFactory:
 
 
     def get_temp_from_pi(self):
+        self.logger.debug('get_temp_from_pi')
         self.temp_value = self.temp_probe.get_temp()
         return self.temp_value
 
@@ -57,42 +81,158 @@ class RaspiFactory:
     def get_charge_level(self):
         pass
 
+    @abstractmethod
+    def setup_wakeup(self):
+        pass
+
+    def save_log(self):
+        pass
+
+    def send_log(self):
+        self.logger.info('Sending log file')
+        try:
+            sender = Sender()
+            self.logger.info('Bye bye.')
+            time.sleep(1)
+            logutil = LogUtil()
+            logutil.read_log(boxsettings.LOG_FILE)
+            if sender.is_online():
+                sender.send_log(logutil.log_text)
+            else:
+                self.logger.info('We do not send log as we are not online')
+        except:
+            msg = "problem occured when attempting to send the log."
+            self.logger.fatal(msg)
+
+
+
+    @abstractmethod
+    def shutdown(self):
+        pass
+
+
+class PijuiceException(Exception):
+    message = ""
+
+    def __init__(self, msg):
+        self.message = msg
+
+
+class RaspiFactoryException:
+    message = ""
+
+    def __init__(self, msg):
+        self.message = msg
+
+class Raspi(RaspiFactory):
+    "A real raspberry pi 3 with pijuice and sensors plate"
+    name = "Raspi-3"
+    pj = None # Pijuice instance
+
+    def initSensors(self):
+        self.logger.debug('waiting for I2C-1 channel...')
+        count = 0
+        max_count = 5
+        while not os.path.exists('/dev/i2c-1') and count < max_count:
+            count += 1
+            time.sleep(5.0)
+        if max_count == 5:
+            self.logger.fatal("/dev/i2c-1 seems not to exist.")
+            raise RaspiFactoryException("/dev/i2c-1 seems not to exist.")
+        self.logger.debug('Creating sensors...')
+        self.ph_probe   = Probes.factory('ph')
+        self.orp_probe  = Probes.factory('orp')
+        self.temp_probe = Probes.factory('temp')
+        self.logger.debug('Raspi-3 initSensors DONE')
+
+    def initPijuice(self):
+        self.logger.debug('initPijuice...')
+        import pijuice
+        self.pj = pijuice.PiJuice(1, 0x14)
+        self.logger.debug('Done.')
+
+    def connect_pijuice(self):
+        self.logger.debug('connecting pijuice to wake_up instance...')
+        self.wake_up.connect_pijuice(self.pj)
+        self.logger.debug('done')
+
+    def get_charge_level(self):
+        self.logger.debug('getting charge level...')
+        charge = self.pj.status.GetChargeLevel()
+        battery_level = charge['data']
+        self.logger.debug('done')
+        return battery_level
+
+    def setup_wakeup(self):
+        self.logger.debug('setup wakeup hours on pijuice...')
+        self.wake_up.set_wakeup_hour_on_pijuice()
+        self.logger.debug('done')
+        self.logger.debug('set alarm on...')
+        self.wake_up.set_wakeup_on()
+        self.logger.debug('done')
+
+    def shutdown(self):
+        self.logger.debug('shutdown...')
+        self.logger.debug('sending log...')
+        self.send_log()
+        self.logger.debug('done')
+        self.logger.debug('Shutdown of pijuice will occur in 60 seconds')
+        self.wake_up.shutdown_pijuice(60)
+        self.logger.debug('power off')
+        self.logger.debug('done')
+        subprocess.call(["sudo", "poweroff"])
+
+
+# Mock object to build a mock raspi
+
+class MockPower:
+    name = "power_module"
+
+    def SetPowerOff(self, seconds):
+        self.logger = logging.getLogger('MockPower')
+        self.logger.info('MockPower: setPowerOff')
+
+
+class MockPijuice:
+    def __init__(self):
+        self.logger = logging.getLogger('MockPijuice')
+        self.power = MockPower()
+        self.logger.debug('MockPower created')
+
 
 class MockRaspi(RaspiFactory):
     "A mockup Raspberry pi"
     name = "MockupRaspi"
 
     def initSensors(self):
-        self.ph_probe   = Probes.factory('mock_ph')
-        self.orp_probe  = Probes.factory('mock_orp')
+        self.logger = logging.getLogger('MockRaspi')
+        self.ph_probe = Probes.factory('mock_ph')
+        self.orp_probe = Probes.factory('mock_orp')
         self.temp_probe = Probes.factory('mock_temp')
-        logger.debug('MockRaspi initSensors done')
-
+        self.logger.debug('MockRaspi initSensors done')
 
     def get_charge_level(self):
         return 60;
 
-class Raspi(RaspiFactory):
-    "A real raspberry pi 3 with pijuice and sensors plate"
-    name = "Raspi-3"
+    def initPijuice(self):
+        self.pj = MockPijuice()
+        self.logger.info('Pijuice initialised')
 
+    def connect_pijuice(self):
+        self.logger.info('Pijuice connected')
 
-    def initSensors(self):
-        logger.debug('waiting for I2C-1 channel...')
-        while not os.path.exists('/dev/i2c-1'):
-            time.sleep(5.0)
-        self.ph_probe   = Probes.factory('ph')
-        self.orp_probe  = Probes.factory('orp')
-        self.temp_probe = Probes.factory('temp')
-        logger.debug('Raspi-3 initSensors DONE')
+    def setup_wakeup(self):
+        self.logger.debug('set wakeup hour of pijuice')
+        self.logger.debug('set pijuice alarm ON')
+        self.logger.debug('shutdown_pijuice')
 
-
-    def get_charge_level(self):
-        import pijuice
-        pj = pijuice.PiJuice(1, 0x14)
-        charge = pj.status.GetChargeLevel()
-        battery_level = charge['data']
-        return battery_level
+    def shutdown(self):
+        self.logger.info('sending log')
+        self.logger.debug('shutdown pijuice')
+        self.logger.debug('Shutdown of pijuice will occur in 60 seconds')
+        self.send_log()
+        self.logger.info('Shutdown')
+        self.logger.debug('power off')
 
 
 
