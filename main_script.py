@@ -55,8 +55,10 @@ def main(pool_settings, logger):
     raspi = None
     try:
         if boxsettings.FAKE_DATA:
+            logger.info('Creating a Mock-Raspi..')
             raspi = RaspiFactory.getRaspi('mock')
         else:
+            logger.info('Creating a real Raspi..')
             raspi = RaspiFactory.getRaspi('Raspi')
     except Exception, e:
         logger.fatal('Fail to init raspi', exc_info=True)
@@ -65,14 +67,18 @@ def main(pool_settings, logger):
             raspi.shutdown()
         else:
             logger.fatal('No shutdown, as planned')
-    logger.debug('Raspi initialised.')
+    logger.info('Raspi initialised.')
+    logger.info('Taking measures..')
     take_measures(raspi, pool_settings, logger)
+    logger.info('Measures taken')
+    logger.info('Sending charge level..')
     send_battery_charge_level(raspi, pool_settings, logger)
-
+    logger.info('Charge level sent')
+    logger.info('Setting wakeup..')
     raspi.setup_wakeup()
-
+    logger.info('Wakeup set')
     if pool_settings.enable_shutdown():
-        logger.debug('Doing shutdown now')
+        logger.info('Shutdown is enabled. Starting shutdown..')
         raspi.shutdown() ## logs are sent too
 
 
