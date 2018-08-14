@@ -47,10 +47,14 @@ class TestMainScript(unittest.TestCase):
             response = sender.send_battery_level(raspi.get_charge_level())
             self.assertEqual(201, response.status_code)
 
-    def test_wakeup(self):
+    def btest_wakeup(self):
         raspi = RaspiFactory.getRaspi('Mock')
         raspi.setup_wakeup()
         raspi.shutdown()
+
+    def test_poolsettings(self):
+        p = PoolSettings()
+        self.assertTrue(p.enable_shutdown())
 
 
 
