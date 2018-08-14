@@ -128,6 +128,9 @@ if __name__ == '__main__':
 
     logger.debug('logger set to log level %s' % log_level)
     logger.debug('permanent log file: %s' % main_log)
+    logger.info('Poolsettings:')
+    logger.info('Readings: %s' % pool_settings.enable_reading())
+    logger.info('Shutdown planed? %s' % pool_settings.enable_shutdown())
     main(pool_settings, logger)
 
 

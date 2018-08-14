@@ -5,7 +5,6 @@ from poolsettings import PoolSettings, HoursUtils
 from log import LogUtil
 import boxsettings
 from restclient import Sender
-from box import RaspiFactory
 
 class PijuiceAlarmException(Exception):
     message = ""
@@ -106,7 +105,9 @@ if __name__ == '__main__':
     logger.addHandler(ch)
     logger.info('Creating a real Raspi..')
     try:
+        from box import RaspiFactory
         raspi = RaspiFactory.getRaspi('Raspi')
+        logger.debug('Shutdown...')
         raspi.shutdown()
     except Exception, e:
         logger.fatal('Fail to init raspi', exc_info=True)
