@@ -55,6 +55,10 @@ class TestMainScript(unittest.TestCase):
     def test_poolsettings(self):
         p = PoolSettings()
         self.assertTrue(p.enable_shutdown())
+        for i in range(0,5):
+            self.assertTrue(p.is_online())
+            self.assertTrue(p.online)
+
 
 
 

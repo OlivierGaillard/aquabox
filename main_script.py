@@ -23,11 +23,19 @@ def do_update(pool_settings, logger):
         logger.info('We do NOT make a git pull')
 
 def take_measures(raspi, pool_settings, logger):
+    if pool_settings.is_online():
+        logger.debug('take_measures: We are online')
+    else:
+        logger.debug('take_measures: We are NOT online')
+    if pool_settings.enable_reading():
+        logger.debug('readings are enabled')
+    else:
+        logger.debug('readings are disabled')
     if pool_settings.enable_reading() and pool_settings.is_online():
         logger.info('We will make reading')
         poolMaster = PoolMaster(raspi=raspi)
         poolMaster.read_measures()
-        poolMaster.send_measures()
+        #poolMaster.send_measures()
         logger.info('End of JOB')
     else:
         logger.info('We do not take readings.')
