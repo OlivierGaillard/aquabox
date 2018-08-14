@@ -179,9 +179,6 @@ class Raspi(RaspiFactory):
 
     def shutdown(self):
         self.logger.debug('shutdown...')
-        self.logger.debug('sending log...')
-        self.send_log()
-        self.logger.debug('done')
         self.logger.debug('Shutdown of pijuice will occur in 60 seconds')
         self.wake_up.shutdown_pijuice(60)
         self.logger.debug('power off')

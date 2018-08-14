@@ -77,9 +77,15 @@ def main(pool_settings, logger):
     logger.info('Setting wakeup..')
     raspi.setup_wakeup()
     logger.info('Wakeup set')
+    logger.debug('sending log...')
+    raspi.send_log()
+    logger.debug('done')
+
     if pool_settings.enable_shutdown():
         logger.info('Shutdown is enabled. Starting shutdown..')
         raspi.shutdown() ## logs are sent too
+    else:
+        logger.info('Shutdown disabled. End of job')
 
 
 if __name__ == '__main__':

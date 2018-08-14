@@ -5,6 +5,7 @@ from poolsettings import PoolSettings, HoursUtils
 from log import LogUtil
 import boxsettings
 from restclient import Sender
+from box import RaspiFactory
 
 class PijuiceAlarmException(Exception):
     message = ""
@@ -93,9 +94,21 @@ class WakeUp:
 
 
 if __name__ == '__main__':
-    pool_settings = PoolSettings()
-    wake_up = WakeUp(poolSettings=pool_settings)
-    wake_up.prepare_wakeup_hour()
-    wake_up.set_wakeup_on()
-    wake_up.shutdown_pijuice()
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    # create console handler and set level to debug
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    ch.setFormatter(formatter)
+    logger.addHandler(ch)
+    logger.info('Creating a real Raspi..')
+    try:
+        raspi = RaspiFactory.getRaspi('Raspi')
+        raspi.shutdown()
+    except Exception, e:
+        logger.fatal('Fail to init raspi', exc_info=True)
+
 
