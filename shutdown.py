@@ -48,7 +48,7 @@ class WakeUp:
                 self.logger.warning('Cannot set alarm')
                 raise PijuiceAlarmException(msg='prepare_wakeup: I cannot set alarm')
             else:
-                self.logger.info('Alarm set for %s UTC' % str(self.raspi.pj.rtcAlarm.GetAlarm()))
+                self.logger.info('Alarm set for %s UTC' % str(self.pj.rtcAlarm.GetAlarm()))
         except Exception, e:
             self.logger.warning('set_wakeup_hour: failed to set wakeup hour', exc_info=True)
 
@@ -59,7 +59,7 @@ class WakeUp:
         # applied when the RTC alarm goes off
         self.logger.debug('setting alarm ON...')
         try:
-            self.raspi.pj.rtcAlarm.SetWakeupEnabled(True)
+            self.pj.rtcAlarm.SetWakeupEnabled(True)
             time.sleep(2.0)
             self.logger.debug('done')
         except Exception, e:

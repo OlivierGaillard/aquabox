@@ -27,6 +27,7 @@ class RaspiFactory:
     wake_up = None
 
     def __init__(self):
+        self.logger = logging.getLogger('RaspiFactory')
         self.pool_settings = PoolSettings()
         self.initSensors()
         self.wake_up = WakeUp(self.pool_settings)
@@ -133,10 +134,15 @@ class Raspi(RaspiFactory):
         self.logger.debug('waiting for I2C-1 channel...')
         count = 0
         max_count = 5
-        while not os.path.exists('/dev/i2c-1') and count < max_count:
+        i2cExist = False
+        if os.path.exists('/dev/i2c-1'):
+            i2cExist = True
+        else:
+            i2cExist = False
+        while not os.path.exists('/dev/i2c-1'):
             count += 1
             time.sleep(5.0)
-        if max_count == 5:
+        if not i2cExist:
             self.logger.fatal("/dev/i2c-1 seems not to exist.")
             raise RaspiFactoryException("/dev/i2c-1 seems not to exist.")
         self.logger.debug('Creating sensors...')

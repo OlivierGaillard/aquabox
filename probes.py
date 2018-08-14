@@ -156,6 +156,7 @@ class Ph(Probes):
 
 
     def __init__(self, address=default_address):
+        self.logger = logging.getLogger('Ph')
         self.controller = ProbesController()
         self.connector = I2Connector(address=address)
         self.file_write = self.connector.file_write

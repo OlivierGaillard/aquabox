@@ -49,9 +49,7 @@ def send_battery_charge_level(raspi, pool_settings, logger):
 
 
 def main(pool_settings, logger):
-    print ('Waiting 3 seconds before network goes up')
-    # TODO: reset waiting time to 30 seconds
-    time.sleep(3)  # to wait for network goes up
+    time.sleep(30)  # to wait for network goes up
     do_update(pool_settings, logger)
     logger.debug('Initialising raspi...')
     raspi = None
@@ -72,7 +70,10 @@ def main(pool_settings, logger):
     send_battery_charge_level(raspi, pool_settings, logger)
 
     raspi.setup_wakeup()
-    raspi.shutdown() ## logs are sent too
+
+    if pool_settings.enable_shutdown():
+        logger.debug('Doing shutdown now')
+        raspi.shutdown() ## logs are sent too
 
 
 if __name__ == '__main__':
