@@ -36,7 +36,7 @@ def take_measures(raspi, pool_settings, logger):
         logger.info('We will make reading')
         poolMaster = PoolMaster(raspi=raspi)
         poolMaster.read_measures()
-        #poolMaster.send_measures()
+        poolMaster.send_measures()
         logger.info('End of JOB')
     else:
         logger.info('We do not take readings.')
