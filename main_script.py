@@ -11,7 +11,8 @@ from box import RaspiFactory
 from log import LogUtil
 import os
 
-
+ONLINE = False  # Are we online?
+READING = False # Do we take measures?
 
 def do_update(pool_settings, logger):
     # Checking if an update is required
@@ -23,19 +24,19 @@ def do_update(pool_settings, logger):
         logger.info('We do NOT make a git pull')
 
 def take_measures(raspi, pool_settings, logger):
-    if pool_settings.is_online():
+    if ONLINE:
         logger.debug('take_measures: We are online')
     else:
         logger.debug('take_measures: We are NOT online')
-    if pool_settings.enable_reading():
+    if READING:
         logger.debug('readings are enabled')
     else:
         logger.debug('readings are disabled')
-    if pool_settings.enable_reading() and pool_settings.is_online():
+    if READING and ONLINE:
         logger.info('We will make reading')
         poolMaster = PoolMaster(raspi=raspi)
         poolMaster.read_measures()
-        poolMaster.send_measures()
+        #poolMaster.send_measures()
         logger.info('End of JOB')
     else:
         logger.info('We do not take readings.')
@@ -45,7 +46,7 @@ def send_battery_charge_level(raspi, pool_settings, logger):
         sender = Sender()
         battery_level = raspi.get_charge_level()
         logger.info('Battery charge in percent: %s' % battery_level)
-        if pool_settings.is_online():
+        if ONLINE:
             logger.info('Sending info to REST')
             response = sender.send_battery_level(battery_level)
             logger.info('Answer: %s' % response.status_code)
@@ -137,8 +138,10 @@ if __name__ == '__main__':
     logger.debug('logger set to log level %s' % log_level)
     logger.debug('permanent log file: %s' % main_log)
     logger.info('Poolsettings:')
-    logger.info('Readings: %s' % pool_settings.enable_reading())
-    logger.info('Shutdown planed? %s' % pool_settings.enable_shutdown())
+    READING = pool_settings.enable_reading()
+    logger.info('Readings: %s' % READING)
+    ONLINE = pool_settings.enable_shutdown()
+    logger.info('Shutdown planed? %s' % ONLINE)
     main(pool_settings, logger)
 
 

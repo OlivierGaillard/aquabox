@@ -48,6 +48,7 @@ class PoolSettings:
                 # falling back to default
                 self.logger.warning("No file found. Using default values", exc_info=True)
 
+
     def is_online(self):
         return self.online
 
