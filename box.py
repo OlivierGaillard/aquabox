@@ -185,6 +185,13 @@ class Raspi(RaspiFactory):
         self.logger.debug('done')
         subprocess.call(["sudo", "poweroff"])
 
+    def bigshutdown(self):
+        self.logger.info('Big shutdown...')
+        self.wake_up.set_wakeup_off()
+        self.wake_up.shutdown_pijuice(60)
+        subprocess.call(["sudo", "poweroff"])
+
+
 
 # Mock object to build a mock raspi
 

@@ -13,6 +13,7 @@ import os
 
 ONLINE = False  # Are we online?
 READING = False # Do we take measures?
+SHUTDOWN = False # No readings, alarms off and desactivated, pijuice off, raspi off
 
 def do_update(pool_settings, logger):
     # Checking if an update is required
@@ -77,6 +78,10 @@ def main(pool_settings, logger):
         else:
             logger.fatal('No shutdown, as planned')
     logger.info('Raspi initialised.')
+    if SHUTDOWN:
+        logger.info('Shutdown of pijuice and pi. Alarms disabled...')
+        raspi.bigshutdown()
+        exit(0)
     logger.info('Taking measures..')
     take_measures(raspi, pool_settings, logger)
     logger.info('Measures taken')

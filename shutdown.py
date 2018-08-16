@@ -65,6 +65,17 @@ class WakeUp:
         except Exception, e:
             self.logger.warning('Wakeup: failed to enable wakeup.', exc_info = True)
 
+    def set_wakeup_off(self):
+        """Disable alarm"""
+        # Disable wakeup
+        self.logger.debug('setting alarm OFF...')
+        try:
+            self.pj.rtcAlarm.SetWakeupEnabled(False)
+            time.sleep(2.0)
+            self.logger.debug('done')
+        except Exception, e:
+            self.logger.warning('Wakeup: failed to disable wakeup.', exc_info=True)
+
     def send_logfile(self):
         self.logger.info('Sending log file')
         try:

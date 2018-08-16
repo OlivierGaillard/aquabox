@@ -23,7 +23,7 @@ class PoolSettings:
         self.logger = logging.getLogger('PoolSettings')
         self.settings = {'enable_reading': False, 'do_update': False,
                     'time_between_readings': 24, 'enable_shutdown': False,
-                    'log_level': logging.DEBUG}
+                    'log_level': logging.DEBUG, 'bigshutdown' : False}
 
         self.online = False
         sender = Sender()
@@ -67,6 +67,9 @@ class PoolSettings:
 
     def log_level(self):
         return self.settings['log_level']
+
+    def bigshutdown(self):
+        return self.settings['bigshutdown']
 
 
 class HoursUtils:

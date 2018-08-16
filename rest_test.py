@@ -197,6 +197,10 @@ INFO	: 2018-07-13 16:28:04,248 : Data sent to /battery/ of REST service.
             msg = "problem occured when attempting to send the log"
             self.assertFalse(True, msg)
 
+    def test_bigshutdown(self):
+        settings = PoolSettings()
+        self.assertFalse(settings.bigshutdown())
+
 
 
 if __name__ == '__main__':
