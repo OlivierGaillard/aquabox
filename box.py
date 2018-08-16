@@ -198,15 +198,22 @@ class Raspi(RaspiFactory):
 class MockPower:
     name = "power_module"
 
+    def __init__(self, pool_settings):
+        self.pool_settings = pool_settings
+
     def SetPowerOff(self, seconds):
         self.logger = logging.getLogger('MockPower')
+        if self.pool_settings.bigshutdown():
+            self.logger.debug('BIG shutdown')
+        else:
+            self.logger.debug('No BIG shutdown')
         self.logger.info('MockPower: setPowerOff')
 
 
 class MockPijuice:
-    def __init__(self):
+    def __init__(self, pool_settings):
         self.logger = logging.getLogger('MockPijuice')
-        self.power = MockPower()
+        self.power = MockPower(pool_settings=pool_settings)
         self.logger.debug('MockPower created')
 
 
@@ -225,7 +232,9 @@ class MockRaspi(RaspiFactory):
         return 60;
 
     def initPijuice(self):
-        self.pj = MockPijuice()
+        from poolsettings import PoolSettings
+        ps = PoolSettings()
+        self.pj = MockPijuice(pool_settings=ps)
         self.logger.info('Pijuice initialised')
 
     def connect_pijuice(self):
@@ -243,6 +252,13 @@ class MockRaspi(RaspiFactory):
         self.send_log()
         self.logger.info('Shutdown')
         self.logger.debug('power off')
+
+
+    def bigshutdown(self):
+        self.logger.info('Big shutdown...')
+        self.pj.power.SetPowerOff(3)
+
+
 
 
 

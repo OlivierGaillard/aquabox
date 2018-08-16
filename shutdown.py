@@ -96,6 +96,8 @@ class WakeUp:
         # checking if an update is required
         # checking if a shutdown should be made
         self.logger.debug('shutdown of pijuice...')
+        bigshutdown = self.pool_settings.bigshutdown()
+        self.logger.debug('pool_settings bigshutdown : %s' % bigshutdown)
         self.logger.info('We will MAKE a shutdown in %s seconds.' % seconds)
         self.pj.power.SetPowerOff(seconds) # 20
 

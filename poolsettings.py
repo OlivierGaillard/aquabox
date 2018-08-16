@@ -12,7 +12,7 @@ class PoolSettings:
     - do update
     """
 
-
+    # PoolSettings instance could be a class attribute of Raspi or WakeUp
     # In case of no connection we load the previously saved JSON-settings
     # If no JSON file can be found we define fall-back values here
 

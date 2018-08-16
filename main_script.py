@@ -59,7 +59,7 @@ def send_battery_charge_level(raspi, pool_settings, logger):
 
 
 def main(pool_settings, logger):
-    time.sleep(30)  # to wait for network goes up
+    time.sleep(3)  # to wait for network goes up
     do_update(pool_settings, logger)
     logger.debug('Initialising raspi...')
     raspi = None
@@ -80,6 +80,9 @@ def main(pool_settings, logger):
     logger.info('Raspi initialised.')
     if SHUTDOWN:
         logger.info('Shutdown of pijuice and pi. Alarms disabled...')
+        logger.debug('Sending log..')
+        raspi.send_log()
+        logger.debug('done.')
         raspi.bigshutdown()
         exit(0)
     logger.info('Taking measures..')
