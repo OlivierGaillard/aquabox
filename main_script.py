@@ -145,8 +145,9 @@ if __name__ == '__main__':
     logger.info('Poolsettings:')
     READING = pool_settings.enable_reading()
     logger.info('Readings: %s' % READING)
-    ONLINE = pool_settings.enable_shutdown()
-    logger.info('Shutdown planed? %s' % ONLINE)
+    ONLINE = pool_settings.is_online()
+    SHUTDOWN = pool_settings.bigshutdown()
+    logger.info('Shutdown planed? %s' % SHUTDOWN)
     main(pool_settings, logger)
 
 
