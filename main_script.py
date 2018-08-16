@@ -59,7 +59,7 @@ def send_battery_charge_level(raspi, pool_settings, logger):
 
 
 def main(pool_settings, logger):
-    time.sleep(3)  # to wait for network goes up
+    time.sleep(30)  # to wait for network goes up
     do_update(pool_settings, logger)
     logger.debug('Initialising raspi...')
     raspi = None
