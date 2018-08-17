@@ -6,6 +6,7 @@ from restclient import Sender
 import boxsettings
 from poolsettings import PoolSettings
 from log import LogUtil
+import os
 
 
 class TestApi(unittest.TestCase):
@@ -69,20 +70,20 @@ class TestApi(unittest.TestCase):
         status_code = sender.del_deg(id)
         self.assertEqual(200, status_code)
 
-    def test_sender_deg_toolow(self):
+    def btest_sender_deg_toolow(self):
         sender = Sender()
         response = sender.send_deg(-23.000)
         self.assertEqual(400, response.status_code)
 
 
-    def test_sender_ph_zero(self):
+    def btest_sender_ph_zero(self):
         logging.info('pH sending test')
         sender = Sender()
         response = sender.send_ph(0)
         logging.info('pH sent. Response: %s' % response.status_code)
         self.assertEqual(400, response.status_code)
 
-    def test_sender_ph_3(self):
+    def btest_sender_ph_3(self):
         logging.info('pH sending test')
         sender = Sender()
         response = sender.send_ph(3)
@@ -111,7 +112,7 @@ class TestApi(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
 
-    def test_get_shutdown_instruction(self):
+    def btest_get_shutdown_instruction(self):
         settings = PoolSettings()
         enable_shutdown = settings.enable_shutdown()
         if enable_shutdown:
@@ -122,7 +123,7 @@ class TestApi(unittest.TestCase):
 
 
 
-    def test_get_update_instruction(self):
+    def btest_get_update_instruction(self):
         settings = PoolSettings()
         print ('Online? %s ' % settings.is_online())
         if settings.do_update():
@@ -149,19 +150,21 @@ class TestApi(unittest.TestCase):
         self.assertIsNotNone(settings.time_beetween_readings())
         print('Time between readings: %s hour(s).' % settings.time_beetween_readings())
 
-    def test_sender_enable_reading(self):
+    def btest_sender_enable_reading(self):
         settings = PoolSettings()
         self.assertIsNotNone(settings.enable_reading())
         print('Enable reading? %s' % settings.enable_reading())
 
-    def test_sender_get_loglevel(self):
+    def btest_sender_get_loglevel(self):
         settings = PoolSettings()
         self.assertIsNotNone(settings.log_level())
         print('Log level? %s' % settings.log_level())
 
-    def test_logutil_loglevel(self):
+    def btest_logutil_loglevel(self):
         logutil = LogUtil()
         self.assertEqual(logging.DEBUG, logutil.get_log_level('DEBUG'))
+
+
 
 
 
@@ -197,10 +200,16 @@ INFO	: 2018-07-13 16:28:04,248 : Data sent to /battery/ of REST service.
             msg = "problem occured when attempting to send the log"
             self.assertFalse(True, msg)
 
-    def test_bigshutdown(self):
+    def btest_bigshutdown(self):
         settings = PoolSettings()
         self.assertFalse(settings.bigshutdown())
 
+
+    def test_ping(self):
+        rep = os.system('ping -c 1 aquawatch.ch')
+        self.assertEqual(0, rep)
+        rep = os.system('ping -c 1 toto')
+        self.assertEqual(512, rep)
 
 
 if __name__ == '__main__':

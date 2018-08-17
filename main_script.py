@@ -122,6 +122,22 @@ def main(pool_settings, logger):
         logger.info('Shutdown disabled. End of job')
 
 
+def ping_rest(logger):
+    host = 'aquawatch.ch'
+    online = False
+    maxtries = 30
+    count = 0
+    logger.debug('ping_rest...')
+    while online == False and count < maxtries:
+        logger.debug('.')
+        rep = os.system('ping -c 1 %s' % host )
+        if rep == 0:
+            online = True
+        time.sleep(3)
+        count += 1
+    logger.debug('ping end. Online: %s' % online)
+    return online
+
 if __name__ == '__main__':
     logname = boxsettings.LOG_FILE
 
@@ -161,8 +177,9 @@ if __name__ == '__main__':
 
     logger.addHandler(fh)
     logger.addHandler(fh2)
-    logger.debug('Waiting 1 minute to let network goes up...')
-    time.sleep(60)  # to wait for network goes up
+    logger.debug('Waiting until network goes up...')
+    ONLINE = ping_rest(logger)
+    #time.sleep(60)  # to wait for network goes up
     logger.debug('Create now the PoolSettings instance..')
     pool_settings = PoolSettings()
     logger.setLevel(pool_settings.log_level())
