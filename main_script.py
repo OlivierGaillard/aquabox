@@ -84,13 +84,13 @@ def main(pool_settings, logger):
     try:
         if boxsettings.FAKE_DATA:
             logger.info('Creating a Mock-Raspi..')
-            raspi = RaspiFactory.getRaspi('mock')
+            raspi = RaspiFactory.getRaspi(pool_settings, 'mock')
         else:
             logger.info('Creating a real Raspi..')
-            raspi = RaspiFactory.getRaspi('Raspi')
+            raspi = RaspiFactory.getRaspi(pool_settings, 'Raspi')
     except Exception, e:
         logger.fatal('Fail to init raspi', exc_info=True)
-        if pool_settings.enable_shutdown():
+        if pool_settings.enable_shutdown() or SHUTDOWN:
             logger.info('doing shutdown, as planned')
             raspi.shutdown()
         else:

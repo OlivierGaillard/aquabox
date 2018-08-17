@@ -26,19 +26,20 @@ class RaspiFactory:
     pool_settings = None
     wake_up = None
 
-    def __init__(self):
+    def __init__(self, pool_settings):
         self.logger = logging.getLogger('RaspiFactory')
-        self.pool_settings = PoolSettings()
+        self.logger.debug('RaspiFactory: __init__')
+        self.pool_settings = pool_settings
         self.initSensors()
         self.wake_up = WakeUp(self.pool_settings)
         self.logger = logging.getLogger('RaspiFactory')
 
     @staticmethod
-    def getRaspi(name):
+    def getRaspi(pool_settings, name):
 
         logger = logging.getLogger('static:getRaspi')
         if name == 'Raspi':
-            raspi = Raspi()
+            raspi = Raspi(pool_settings)
             logger.debug('making a real raspi...')
             raspi.initPijuice()
             raspi.connect_pijuice()
@@ -46,7 +47,7 @@ class RaspiFactory:
             return raspi
         else:
             logger.debug('RaspiFactory: will create one MockRaspi')
-            raspi = MockRaspi()
+            raspi = MockRaspi(pool_settings)
             raspi.initPijuice()
             raspi.connect_pijuice()
             logger.debug('Mock raspi ready')
