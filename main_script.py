@@ -161,8 +161,8 @@ if __name__ == '__main__':
 
     logger.addHandler(fh)
     logger.addHandler(fh2)
-    logger.debug('Waiting 30 seconds to let network goes up...')
-    time.sleep(30)  # to wait for network goes up
+    logger.debug('Waiting 1 minute to let network goes up...')
+    time.sleep(60)  # to wait for network goes up
     logger.debug('Create now the PoolSettings instance..')
     pool_settings = PoolSettings()
     logger.setLevel(pool_settings.log_level())
