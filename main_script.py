@@ -149,6 +149,7 @@ if __name__ == '__main__':
     logger.debug('permanent log file: %s' % main_log)
     logger.info('Poolsettings:')
     UPDATE = pool_settings.do_update()
+    logger.info('UPDATE: %s' % UPDATE)
     READING = pool_settings.enable_reading()
     logger.info('Readings: %s' % READING)
     ONLINE = pool_settings.is_online()
