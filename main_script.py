@@ -18,7 +18,9 @@ UPDATE = True
 
 def do_update(pool_settings, logger):
     # Checking if an update is required
-    logger.debug('do_update pool_settings. do_update? %s is_online %s' % (pool_settings.do_update(), pool_settings.is_online()))
+    logger.debug('do_update: pool_settings')
+    logger.debug('Online: %s Reading: %s' % (pool_settings.is_online(), pool_settings.enable_reading()))
+    logger.debug('do_update pool_settings. do_update? %s ' % pool_settings.do_update())
     if pool_settings.do_update() and pool_settings.is_online():
         logger.info('We will make a git pull')
         subprocess.call(["git", "pull"])
@@ -26,15 +28,20 @@ def do_update(pool_settings, logger):
     else:
         logger.info('We do NOT make a git pull')
 
+
 def take_measures(raspi, pool_settings, logger):
+    logger.debug('take_measures: pool_settings')
+    logger.debug('Online: %s Reading: %s' % (pool_settings.is_online(), pool_settings.enable_reading()))
+    logger.debug('do_update pool_settings. do_update? %s ' % pool_settings.do_update())
+
     if ONLINE:
-        logger.debug('take_measures: We are online')
+        logger.debug('take_measures: We are ONLINE')
     else:
-        logger.debug('take_measures: We are NOT online')
+        logger.debug('take_measures: We are NOT ONLINE')
     if READING:
-        logger.debug('readings are enabled')
+        logger.debug('READING is enabled')
     else:
-        logger.debug('readings are disabled')
+        logger.debug('READING is disabled')
     if READING and ONLINE:
         logger.info('We will make reading')
         poolMaster = PoolMaster(raspi=raspi)
@@ -44,17 +51,26 @@ def take_measures(raspi, pool_settings, logger):
     else:
         logger.info('We do not take readings.')
 
+    logger.debug('AFTER measures are taken: pool_settings')
+    logger.debug('Online: %s Reading: %s' % (pool_settings.is_online(), pool_settings.enable_reading()))
+    logger.debug('do_update pool_settings. do_update? %s ' % pool_settings.do_update())
+
+
 def send_battery_charge_level(raspi, pool_settings, logger):
+    logger.debug('send_battery_charge_level: pool_settings')
+    logger.debug('Online: %s Reading: %s' % (pool_settings.is_online(), pool_settings.enable_reading()))
+    logger.debug('do_update pool_settings. do_update? %s ' % pool_settings.do_update())
+
     try:
         sender = Sender()
         battery_level = raspi.get_charge_level()
         logger.info('Battery charge in percent: %s' % battery_level)
         if ONLINE:
-            logger.info('Sending info to REST')
+            logger.info('ONLINE: Sending info to REST')
             response = sender.send_battery_level(battery_level)
             logger.info('Answer: %s' % response.status_code)
         else:
-            logger.info(('Off-line. Battery level not sent'))
+            logger.info(('NOT ONLINE. Battery level not sent'))
     except:
         logger.fatal("Cannot create pijuice object")
 
