@@ -125,12 +125,14 @@ def main(pool_settings, logger):
 
 if __name__ == '__main__':
     logname = boxsettings.LOG_FILE
-    pool_settings = PoolSettings()
+
     log_util = LogUtil()
-    log_level = log_util.get_log_level(pool_settings.log_level())
+
     # create logger at the root level. Otherwise the loggers in module will not use this configuration.
     logger = logging.getLogger()
-    logger.setLevel(log_level)
+    logger.setLevel(logging.DEBUG)
+
+
 
 
     # create console handler and set level to debug
@@ -161,6 +163,10 @@ if __name__ == '__main__':
     logger.addHandler(fh)
     logger.addHandler(fh2)
 
+    pool_settings = PoolSettings()
+    logger.setLevel(pool_settings.log_level())
+
+    log_level = log_util.get_log_level(pool_settings.log_level())
     logger.debug('logger set to log level %s' % log_level)
     logger.debug('permanent log file: %s' % main_log)
     logger.info('Poolsettings:')
