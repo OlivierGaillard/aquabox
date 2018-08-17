@@ -90,7 +90,6 @@ if __name__ == '__main__':
 
     logger.addHandler(fh)
     logger.debug('logger set to log level %s' % log_level)
-    logger.debug('permanent log file: %s' % main_log)
     logger.info('Poolsettings:')
     READING = pool_settings.enable_reading()
     logger.info('Readings: %s' % READING)
