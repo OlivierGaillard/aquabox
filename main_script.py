@@ -14,9 +14,11 @@ import os
 ONLINE = False  # Are we online?
 READING = False # Do we take measures?
 SHUTDOWN = False # No readings, alarms off and desactivated, pijuice off, raspi off
+UPDATE = True
 
 def do_update(pool_settings, logger):
     # Checking if an update is required
+    logger.debug('do_update pool_settings. do_update? %s is_online %s' % (pool_settings.do_update(), pool_settings.is_online()))
     if pool_settings.do_update() and pool_settings.is_online():
         logger.info('We will make a git pull')
         subprocess.call(["git", "pull"])
@@ -146,6 +148,7 @@ if __name__ == '__main__':
     logger.debug('logger set to log level %s' % log_level)
     logger.debug('permanent log file: %s' % main_log)
     logger.info('Poolsettings:')
+    UPDATE = pool_settings.do_update()
     READING = pool_settings.enable_reading()
     logger.info('Readings: %s' % READING)
     ONLINE = pool_settings.is_online()
