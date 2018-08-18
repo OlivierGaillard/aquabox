@@ -152,9 +152,6 @@ if __name__ == '__main__':
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
 
-
-
-
     # create console handler and set level to debug
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
@@ -202,7 +199,3 @@ if __name__ == '__main__':
     BIGSHUTDOWN = pool_settings.bigshutdown()
     logger.info('BIG Shutdown planed? %s' % BIGSHUTDOWN)
     main(pool_settings, logger)
-
-
-
-
