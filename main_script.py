@@ -102,6 +102,13 @@ def main(pool_settings, logger):
         logger.debug('done.')
         raspi.bigshutdown()
         exit(0)
+    if ONLINE == False:
+        logger.info('We are not online. Then we shutdown in 5 minutes')
+        # then how to shutdown in 5 minutes? shutdown -h +300
+        # stop shutdown with: shutdown -c
+        raspi.shutdown_later(5)
+        # os.system('shutdown -h +5')
+        # os._exit(0)
     logger.info('Taking measures..')
     take_measures(raspi, pool_settings, logger)
     logger.info('Measures taken')
@@ -111,9 +118,6 @@ def main(pool_settings, logger):
     logger.info('Setting wakeup..')
     raspi.setup_wakeup()
     logger.info('Wakeup set')
-    logger.debug('sending log...')
-    raspi.send_log()
-    logger.debug('done')
 
     if pool_settings.enable_shutdown():
         logger.info('Shutdown is enabled. Starting shutdown..')
@@ -125,7 +129,7 @@ def main(pool_settings, logger):
 def ping_rest(logger):
     host = 'aquawatch.ch'
     online = False
-    maxtries = 30
+    maxtries = 3
     count = 0
     logger.debug('ping_rest...')
     while online == False and count < maxtries:

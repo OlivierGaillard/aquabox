@@ -18,7 +18,7 @@ class RaspiFactory:
     temp_probe = None
     ph_probe   = None
     orp_probe  = None
-    pj         = None # Pijuice
+    #pj         = None # Pijuice
     ph_value = 0.001
     orp_value = 0.1
     temp_value = 0.001
@@ -192,6 +192,12 @@ class Raspi(RaspiFactory):
         self.wake_up.shutdown_pijuice(60)
         subprocess.call(["sudo", "poweroff"])
 
+    def shutdown_later(self, minutes):
+        self.logger.debug('Shutdown in %s minutes.' % minutes)
+        self.wake_up.shutdown_pijuice(60*minutes+60) # 1 minute after pi shutdown, pijuice will be power off
+        subprocess.call(["sudo", "shutdown" "-h" "+%s" % minutes])
+
+
 
 
 # Mock object to build a mock raspi
@@ -239,6 +245,7 @@ class MockRaspi(RaspiFactory):
         self.logger.info('Pijuice initialised')
 
     def connect_pijuice(self):
+        self.wake_up.connect_pijuice(self.pj)
         self.logger.info('Pijuice connected')
 
     def setup_wakeup(self):
@@ -258,6 +265,13 @@ class MockRaspi(RaspiFactory):
     def bigshutdown(self):
         self.logger.info('Big shutdown...')
         self.pj.power.SetPowerOff(3)
+
+    def shutdown_later(self, minutes):
+        self.logger.debug('Shutdown in %s minutes.' % minutes)
+        self.wake_up.shutdown_pijuice(60*minutes+60) # 1 minute after pi shutdown, pijuice will be power off
+        os.system('sudo shutdown -h +5')
+        #subprocess.call(["sudo", "shutdown -h +5"])
+
 
 
 
