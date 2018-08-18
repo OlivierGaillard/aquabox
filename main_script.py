@@ -130,7 +130,7 @@ def main(pool_settings, logger):
 def ping_rest(logger):
     host = 'aquawatch.ch'
     online = False
-    maxtries = 3
+    maxtries = 30
     count = 0
     logger.debug('ping_rest...')
     while online == False and count < maxtries:
