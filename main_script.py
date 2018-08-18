@@ -13,7 +13,7 @@ import os
 
 ONLINE = False  # Are we online?
 READING = False # Do we take measures?
-SHUTDOWN = False # No readings, alarms off and desactivated, pijuice off, raspi off
+BIGSHUTDOWN = False # No readings, alarms off and desactivated, pijuice off, raspi off
 UPDATE = True
 
 def do_update(pool_settings, logger):
@@ -89,13 +89,13 @@ def main(pool_settings, logger):
             raspi = RaspiFactory.getRaspi(pool_settings, 'Raspi')
     except Exception, e:
         logger.fatal('Fail to init raspi', exc_info=True)
-        if pool_settings.enable_shutdown() or SHUTDOWN:
+        if pool_settings.enable_shutdown() or BIGSHUTDOWN:
             logger.info('doing shutdown, as planned')
             raspi.shutdown()
         else:
             logger.fatal('No shutdown, as planned')
     logger.info('Raspi initialised.')
-    if SHUTDOWN:
+    if BIGSHUTDOWN:
         logger.info('Shutdown of pijuice and pi. Alarms disabled...')
         logger.debug('Sending log..')
         raspi.send_log()
@@ -120,10 +120,11 @@ def main(pool_settings, logger):
     logger.info('Wakeup set')
 
     if pool_settings.enable_shutdown():
-        logger.info('Shutdown is enabled. Starting shutdown..')
+        logger.info('(pool_settings: Shutdown is enabled. Starting shutdown..')
         raspi.shutdown() ## logs are sent too
     else:
-        logger.info('Shutdown disabled. End of job')
+        logger.info('pool_settings: Shutdown disabled. Sending log')
+        raspi.send_log()
 
 
 def ping_rest(logger):
@@ -198,8 +199,8 @@ if __name__ == '__main__':
     logger.info('Readings: %s' % READING)
     ONLINE = pool_settings.is_online()
     logger.info('ONLINE: %s' % ONLINE)
-    SHUTDOWN = pool_settings.bigshutdown()
-    logger.info('BIG Shutdown planed? %s' % SHUTDOWN)
+    BIGSHUTDOWN = pool_settings.bigshutdown()
+    logger.info('BIG Shutdown planed? %s' % BIGSHUTDOWN)
     main(pool_settings, logger)
 
 
