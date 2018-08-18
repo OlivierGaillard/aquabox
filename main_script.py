@@ -9,6 +9,7 @@ from read_and_send import PoolMaster
 import boxsettings
 from box import RaspiFactory
 import os
+from log import LogUtil
 
 ONLINE = False  # Are we online?
 READING = False # Do we take measures?
@@ -119,10 +120,13 @@ def main(pool_settings, logger):
     logger.info('Wakeup set')
 
     if pool_settings.enable_shutdown():
+        logger.info('Sending log...')
+        raspi.send_log()
+        logger.info('Done.')
         logger.info('(pool_settings: Shutdown is enabled. Starting shutdown..')
         raspi.shutdown()
     else:
-        logger.info('pool_settings: Shutdown disabled. We are not sending log')
+        logger.info('pool_settings: Shutdown disabled.')
 
 
 
@@ -185,7 +189,7 @@ if __name__ == '__main__':
     logger.debug('Create now the PoolSettings instance..')
     pool_settings = PoolSettings()
     logger.setLevel(pool_settings.log_level())
-
+    log_util = LogUtil()
     log_level = log_util.get_log_level(pool_settings.log_level())
     logger.debug('logger set to log level %s' % log_level)
     logger.debug('permanent log file: %s' % main_log)
