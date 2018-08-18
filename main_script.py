@@ -8,7 +8,6 @@ from poolsettings import PoolSettings
 from read_and_send import PoolMaster
 import boxsettings
 from box import RaspiFactory
-from log import LogUtil
 import os
 
 ONLINE = False  # Are we online?
@@ -121,10 +120,13 @@ def main(pool_settings, logger):
 
     if pool_settings.enable_shutdown():
         logger.info('(pool_settings: Shutdown is enabled. Starting shutdown..')
-        raspi.shutdown() ## logs are sent too
+        raspi.shutdown()
     else:
-        logger.info('pool_settings: Shutdown disabled. Sending log')
-        raspi.send_log()
+        logger.info('pool_settings: Shutdown disabled. We are not sending log')
+
+
+
+
 
 
 def ping_rest(logger):
@@ -145,8 +147,6 @@ def ping_rest(logger):
 
 if __name__ == '__main__':
     logname = boxsettings.LOG_FILE
-
-    log_util = LogUtil()
 
     # create logger at the root level. Otherwise the loggers in module will not use this configuration.
     logger = logging.getLogger()
