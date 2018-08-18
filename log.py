@@ -10,7 +10,12 @@ class LogUtil:
                  'CRITICAL' : logging.CRITICAL,
                  'FATAL' : logging.FATAL}
 
+    def __init__(self):
+        self.logger = logging.getLogger('LogUtil')
+        self.logger.debug('LogUtil created')
+
     def read_log(self, log_file):
+        self.logger.debug('reading log file %s' % log_file)
         log_file = log_file
         f = open(log_file, 'r')
         self.log_text = f.read()
