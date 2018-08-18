@@ -99,6 +99,7 @@ class RaspiFactory:
             logutil = LogUtil()
             logutil.read_log(boxsettings.LOG_FILE)
             if sender.is_online():
+                self.logger.debug('sender.is_online')
                 sender.send_log(logutil.log_text)
             else:
                 self.logger.info('We do not send log as we are not online')
