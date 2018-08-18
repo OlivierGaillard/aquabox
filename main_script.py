@@ -152,6 +152,7 @@ def ping_rest(logger):
 if __name__ == '__main__':
     logname = boxsettings.LOG_FILE
 
+
     # create logger at the root level. Otherwise the loggers in module will not use this configuration.
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
@@ -160,8 +161,6 @@ if __name__ == '__main__':
     ch = logging.StreamHandler()
     ch.setLevel(logging.DEBUG)
 
-    fh = logging.FileHandler(logname, mode='w')
-    fh.setLevel(logging.DEBUG)
 
     # create a permanent file logger with rotate
     current_dir = os.path.abspath('.')
@@ -175,14 +174,26 @@ if __name__ == '__main__':
     # add formatter to ch
     ch.setFormatter(formatter)
 
-    fh.setFormatter(formatter)
+
     fh2.setFormatter(formatter)
 
     # add ch to logger
     logger.addHandler(ch)
 
-    logger.addHandler(fh)
+
     logger.addHandler(fh2)
+    logger.debug('removing old rest.log file...')
+    try:
+        os.unlink(logname)
+    except Exception, e:
+        logger.debug('failed to remove file', exc_info=True)
+
+    fh = logging.FileHandler(logname)
+    fh.setFormatter(formatter)
+    fh.setLevel(logging.DEBUG)
+
+
+    logger.addHandler(fh)
     logger.debug('Waiting until network goes up...')
     ONLINE = ping_rest(logger)
     #time.sleep(60)  # to wait for network goes up
