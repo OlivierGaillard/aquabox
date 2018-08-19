@@ -4,6 +4,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 from restclient import Sender
 import time
+import datetime
 from poolsettings import PoolSettings
 from read_and_send import PoolMaster
 import boxsettings
@@ -196,7 +197,16 @@ if __name__ == '__main__':
     logger.addHandler(fh)
     logger.debug('Waiting until network goes up...')
     ONLINE = ping_rest(logger)
-    #time.sleep(60)  # to wait for network goes up
+
+    logger.info('Setting time..')
+    try:
+        subprocess.call(["sudo", "hwclock", "--hctosys"])
+        txt = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S') + ' -- Started\n'
+        logger.info(txt)
+        logger.info('Time set')
+    except Exception, e:
+        logger.warning('Problem to set the time:', exc_info=True)
+
     logger.debug('Create now the PoolSettings instance..')
     pool_settings = PoolSettings()
     logger.setLevel(pool_settings.log_level())
